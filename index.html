@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <!--
+    Pagina sulla sostenibilita' di Fileni, con l'archivio dei report.
+
+    Tutto il contenuto e' scritto qui, nell'HTML. Ho voluto che la pagina si leggesse per
+    intero anche senza stile e senza JavaScript: il CSS (css/style.css) e gli script
+    (js/main.js) aggiungono grafica e comodita', ma non creano testo.
+
+    Gli agganci che CSS e script cercano nel codice sono pochi. L'attributo data-js dice a
+    cosa serve un elemento (archive, archive-filter, archive-chips, archive-status,
+    theme-toggle, nav-toggle, tip, counter, reveal). Gli attributi data-year, data-type e
+    data-lang di ogni voce dell'archivio servono al filtro. Nei contatori animati il numero
+    vero sta nell'attributo value dell'elemento data. La variabile --v nello stile di una
+    cella, da 0 a 1, e' la lunghezza della barra. Infine data-theme sull'elemento html vale
+    light o dark, e se manca la pagina e' chiara.
+
+    Le classi seguono la convenzione BEM e non le uso mai per il comportamento, solo per
+    lo stile. Niente loghi ne' immagini di altri, e solo percorsi relativi, perche' su
+    GitHub Pages la pagina sta in una sottocartella.
+
+    Accanto a ogni dato preso dai bilanci di Fileni indico la fonte, cioe' il documento e
+    la pagina del PDF da cui l'ho ricavato.
+  -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dal bilancio di sostenibilità al web: i report di Fileni</title>
+  <meta name="description" content="Pagina didattica sull'impegno di sostenibilità di Fileni, con indicatori chiave e archivio dei report scaricabili.">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#fbfcfb">
+  <link rel="canonical" href="https://luigitroiano.github.io/fileni-sostenibilita-web/">
+  <!-- Servono per l'anteprima quando qualcuno condivide il link su WhatsApp, LinkedIn o Teams. Chi visita la pagina non scarica nulla in piu'. -->
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="it_IT">
+  <meta property="og:site_name" content="Dal bilancio di sostenibilità al web — progetto didattico">
+  <meta property="og:title" content="L'impegno di sostenibilità di Fileni">
+  <meta property="og:description" content="Indicatori chiave 2022-2025 con fonte e pagina, limiti dichiarati e archivio dei bilanci di sostenibilità di Fileni da scaricare. Progetto didattico non affiliato.">
+  <meta property="og:url" content="https://luigitroiano.github.io/fileni-sostenibilita-web/">
+  <meta property="og:image" content="https://luigitroiano.github.io/fileni-sostenibilita-web/img/anteprima.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Titolo della pagina su sfondo scuro con aloni verdi: l'impegno di sostenibilità di Fileni, report 2020-2025.">
+  <meta name="twitter:card" content="summary_large_image">
+  <!-- L'icona della scheda e' scritta qui dentro come SVG, cosi' il browser non deve scaricare un file a parte e non cerca favicon.ico. -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%2315803d'/%3E%3Cpath d='M9 22c0-8 6-13 14-13 0 8-5 14-13 14l5-5' fill='none' stroke='%23fff' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E">
+  <!-- Chiedo il font subito, insieme al CSS, cosi' il carattere di riserva resta a schermo il meno possibile. -->
+  <link rel="preload" href="fonts/inter-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/style.css?v=20261121-18">
+  <!--
+    Questo piccolo script parte prima che la pagina compaia. Aggiunge la classe js, che serve
+    al menu delle sezioni, e rimette il tema scelto l'ultima volta, cosi' non si vede per un
+    attimo il tema sbagliato.
+  -->
+  <script>
+    (function () {
+      document.documentElement.classList.add("js");
+      try {
+        var saved = localStorage.getItem("theme");
+        if (saved === "light" || saved === "dark") document.documentElement.dataset.theme = saved;
+      } catch (e) { /* localStorage non disponibile: vale il tema chiaro */ }
+    })();
+  </script>
+  <script type="module" src="js/main.js?v=20261121-18"></script>
+</head>
+<body>
+  <a class="skip-link" href="#contenuto">Salta al contenuto</a>
+
+  <header class="site-header">
+    <!-- Il marchio del progetto e' un simbolo inventato con il nome scritto accanto. Non uso il logo di Fileni, che e' un marchio registrato dell'azienda. -->
+    <a class="brand" href="#contenuto">
+      <svg class="brand__mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+        <defs><linearGradient id="brand-sfumatura" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4ade80"/><stop offset="1" stop-color="#0f766e"/></linearGradient></defs>
+        <rect width="32" height="32" rx="9" fill="url(#brand-sfumatura)"/>
+        <path d="M9 22c0-8 6-13 14-13 0 8-5 14-13 14l5-5" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+      <span class="brand__text"><span class="brand__name">Fileni</span><span class="brand__tag">progetto didattico</span></span>
+    </a>
+    <!-- Pulsante del menu per il telefono. Lo mostro solo quando JavaScript e' attivo, perche' senza script non potrebbe aprire nulla. -->
+    <button class="nav-toggle" type="button" data-js="nav-toggle" aria-expanded="false" aria-controls="menu-sezioni" hidden>
+      <span class="visually-hidden">Menu delle sezioni</span>
+      <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><line x1="3" y1="5" x2="17" y2="5"/><line x1="3" y1="10" x2="17" y2="10"/><line x1="3" y1="15" x2="17" y2="15"/></svg>
+    </button>
+    <nav class="site-nav" id="menu-sezioni" aria-label="Sezioni della pagina">
+      <ul class="site-nav__list">
+        <li><a class="site-nav__link" href="#fileni">Fileni</a></li>
+        <li><a class="site-nav__link" href="#pilastri">Pilastri</a></li>
+        <li><a class="site-nav__link" href="#kpi">Indicatori</a></li>
+        <li><a class="site-nav__link" href="#report">Report</a></li>
+        <li><a class="site-nav__link" href="#metodo">Metodo</a></li>
+        <li><a class="site-nav__link" href="#accessibilita">Accessibilità</a></li>
+      </ul>
+    </nav>
+    <!-- Anche l'interruttore del tema resta nascosto finche' lo script non lo attiva: un pulsante che non fa niente confonderebbe. -->
+    <button class="theme-toggle" type="button" data-js="theme-toggle" aria-pressed="false" title="Tema scuro" hidden>
+      <span class="visually-hidden">Tema scuro</span>
+      <span class="theme-toggle__knob" aria-hidden="true"></span>
+      <svg class="theme-toggle__icon theme-toggle__icon--sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      <svg class="theme-toggle__icon theme-toggle__icon--moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>
+    </button>
+  </header>
+
+  <main id="contenuto">
+    <section class="hero">
+      <p class="hero__eyebrow"><strong>Fileni Alimentare S.p.A.</strong> · Società Benefit ·&nbsp;<span lang="en">B Corp</span></p>
+      <h1 class="hero__title">L'impegno di sostenibilità di Fileni</h1>
+      <p class="hero__lead">Fileni è una filiera avicola integrata che pubblica ogni anno il proprio bilancio di sostenibilità. Questa pagina raccoglie i bilanci, ne riassume i dati principali indicando per ciascuno documento e pagina, e dichiara dove i numeri non si possono confrontare.</p>
+      <!-- E' il primo link del contenuto: da tastiera, dopo «Salta al contenuto», basta un altro tasto per arrivare al download. Anche la seconda riga fa parte del nome del link. -->
+      <div class="hero__actions">
+        <a class="hero__cta" href="https://www.fileni.it/wp-content/uploads/2026/11/bilancio-sostenibilita-2025_fileni.pdf" type="application/pdf" rel="external noopener" target="_blank">Scarica il Bilancio di sostenibilità 2025 <span class="hero__cta-meta">italiano (PDF – 17,6 MB)<span class="visually-hidden"> — si apre il sito di Fileni in una nuova scheda</span></span></a>
+        <a class="hero__secondary" href="#report">Sfoglia l'archivio dei report</a>
+      </div>
+      <!-- Quattro cifre in evidenza. Il valore giusto e' gia' scritto nel codice: l'animazione che le fa salire e' solo un effetto in piu'. -->
+      <dl class="hero__stats">
+        <div class="hero__stat"><dt>Dipendenti a fine 2025</dt><dd><data data-js="counter" value="2509">2.509</data></dd></div>
+        <div class="hero__stat"><dt>Fatturato netto del Gruppo, 2025</dt><dd><data data-js="counter" value="680">680</data> <abbr title="milioni di euro">M€</abbr></dd></div>
+        <div class="hero__stat"><dt>Ettari della filiera biologica, 2025</dt><dd><data data-js="counter" value="11360">11.360</data></dd></div>
+        <div class="hero__stat"><dt>Energia da fonti rinnovabili, 2025</dt><dd><data data-js="counter" value="33.4">33,4</data>%</dd></div>
+      </dl>
+      <p class="hero__source">Fonti: Bilancio 2025, pp. 13, 23, 44 e 46. La quota rinnovabile è calcolata sui dati del report.</p>
+    </section>
+
+    <!-- Solo decorazione: dei campi stilizzati che si muovono piano con lo scorrimento. Non contiene informazioni, quindi i lettori di schermo la saltano. -->
+    <div class="field" aria-hidden="true">
+      <svg viewBox="0 0 800 120" preserveAspectRatio="xMidYMid slice" focusable="false">
+        <circle class="field__sun" cx="660" cy="34" r="16"/>
+        <path class="field__far" d="M0 70 C120 40 240 40 360 62 S600 84 800 50 V120 H0Z"/>
+        <path class="field__mid" d="M0 84 C140 62 280 64 400 80 S640 98 800 74 V120 H0Z"/>
+        <path class="field__near" d="M0 100 C160 84 300 86 430 98 S660 112 800 96 V120 H0Z"/>
+        <path class="field__rows" d="M40 120 C120 100 200 96 280 94 M200 120 C280 104 360 100 440 102 M380 120 C460 108 540 106 620 104 M560 120 C640 112 720 108 780 104"/>
+      </svg>
+    </div>
+
+    <section class="section" id="fileni" aria-labelledby="fileni-titolo">
+      <h2 class="section__title" id="fileni-titolo">Chi è Fileni</h2>
+      <!-- Illustrazione del capitolo, solo decorativa: i lettori di schermo la saltano e sul telefono non compare. -->
+      <svg class="section__art" viewBox="0 0 400 300" aria-hidden="true" focusable="false">
+        <defs><clipPath id="art-cerchio-fileni"><circle cx="205" cy="150" r="140"/></clipPath></defs>
+        <circle class="art-bg" cx="205" cy="150" r="140"/>
+        <circle class="art-soft2 art-line" cx="300" cy="80" r="22"/>
+        <g clip-path="url(#art-cerchio-fileni)">
+          <path class="art-soft" d="M40 222c70-48 130-44 190-16s100 26 140-4v90H40z"/>
+          <path class="art-soft2" d="M30 242c90-34 190-26 250-6s70 12 95 2v60H30z"/>
+        </g>
+        <path class="art-paper art-line" d="M150 210v-58l35-27 35 27v58z"/>
+        <path class="art-line" d="M142 156l43-35 43 35M175 210v-30h20v30M175 180l20 30M195 180l-20 30"/>
+        <path class="art-line" d="M268 214v-30"/><circle class="art-soft art-line" cx="268" cy="168" r="19"/>
+        <path class="art-line" d="M90 252q90-22 180-4M120 266q80-14 150-4"/>
+      </svg>
+      <p class="section__text">Fileni Alimentare S.p.A. Società Benefit è un'impresa agroalimentare a conduzione familiare. Controlla l'intera filiera avicola: riproduttori, incubatoi, mangimifici, allevamenti, macellazione e trasformazione, quest'ultima negli stabilimenti di Cingoli e Castelplanio. La componente biologica è attiva dal 2000. È Società Benefit dal 2021 e <span lang="en">B Corp</span> dal 2022; nel 2025 la certificazione è stata rinnovata con un punteggio di 94,7. <span class="section__source">Fonti: Bilancio 2025, pp. 5, 7 e 10; Report 2024, pp. 6, 11 e 12.</span></p>
+      <p class="section__text">I dati ambientali e del personale che trovi in questa pagina riguardano la Piattaforma Fileni, cioè il Gruppo insieme alla cooperativa Carnj; il fatturato riguarda il Gruppo.</p>
+      <h3 class="section__subtitle">Fileni in cifre, anno 2025</h3>
+      <!--
+        Le quattro cifre sono disegnate come un percorso a tappe, a zig-zag sul computer e in
+        colonna sul telefono. Sotto resta un normale elenco di termini e valori. Icone e numeri
+        delle tappe sono decorativi, e la linea che le unisce la disegna il CSS.
+      -->
+      <dl class="steps">
+        <div class="step" data-js="reveal">
+          <dt class="step__label"><span class="step__badge" aria-hidden="true"><svg class="step__icon" viewBox="0 0 24 24" focusable="false"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.2c2.9.4 5 2.8 5 5.8"/></svg><span class="step__num">01</span></span>Dipendenti al 31 dicembre</dt>
+          <dd class="step__value"><data value="2509">2.509</data></dd>
+          <dd class="step__note">2.386 nel 2024 · <span class="step__source">Bilancio&nbsp;2025, p.&nbsp;46</span></dd>
+        </div>
+        <div class="step" data-js="reveal">
+          <dt class="step__label"><span class="step__badge" aria-hidden="true"><svg class="step__icon" viewBox="0 0 24 24" focusable="false"><path d="M17.5 6.6a7 7 0 1 0 0 10.8"/><path d="M4 10.5h9M4 13.5h9"/></svg><span class="step__num">02</span></span>Fatturato netto del Gruppo</dt>
+          <dd class="step__value"><data value="680">680</data> <abbr title="milioni di euro">M€</abbr></dd>
+          <dd class="step__note">612 M€ nel 2024 · <span class="step__source">Bilancio&nbsp;2025, p.&nbsp;13</span></dd>
+        </div>
+        <div class="step" data-js="reveal">
+          <dt class="step__label"><span class="step__badge" aria-hidden="true"><svg class="step__icon" viewBox="0 0 24 24" focusable="false"><path d="M4 4v16h16"/><path d="m7.5 15 4-4.5 3 3 5-6"/><path d="M16 7.5h3.5V11"/></svg><span class="step__num">03</span></span>Margine operativo lordo</dt>
+          <dd class="step__value"><data value="34.5">34,5</data> <abbr title="milioni di euro">M€</abbr></dd>
+          <dd class="step__note">Il 5% del valore della produzione, 4,8 M€ in più del 2024 · <span class="step__source">Bilancio&nbsp;2025, p.&nbsp;13</span></dd>
+        </div>
+        <div class="step" data-js="reveal">
+          <dt class="step__label"><span class="step__badge" aria-hidden="true"><svg class="step__icon" viewBox="0 0 24 24" focusable="false"><path d="M3 11.5 12 5l9 6.5V20H3z"/><path d="M9 20v-5.5h6V20"/><path d="M3 11.5h18"/></svg><span class="step__num">04</span></span>Allevamenti conformi all'<span lang="en">European Chicken Commitment</span> (potenziale)</dt>
+          <dd class="step__value"><data value="659283">659.283</data> m²</dd>
+          <dd class="step__note">Capacità teorica dei centri al 31 dicembre, non superficie occupata · <span class="step__source">Bilancio&nbsp;2025, p.&nbsp;24</span></dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="section" id="pilastri" aria-labelledby="pilastri-titolo">
+      <h2 class="section__title" id="pilastri-titolo">L'impegno per pilastri</h2>
+      <p class="section__text">Le cinque aree seguono i capitoli dei bilanci di Fileni. Per ciascuna si riportano alcuni risultati e, dove serve, il limite da tenere presente. Dati riferiti al 2025 salvo diversa indicazione.</p>
+      <div class="section__grid">
+        <article class="pillar" data-js="reveal">
+          <h3 class="pillar__title">Benessere animale</h3>
+          <p class="pillar__text">Fileni aderisce dal 2021 all'<span lang="en">European Chicken Commitment</span> (ECC), un insieme di requisiti su densità, razze, arricchimenti e stordimento. Dal 12 maggio 2025 tutti i prodotti a marchio Fileni a base di pollo sono realizzati con polli allevati secondo questi criteri. Le filiere biologiche e all'aperto rispettano i parametri ECC al 100%; nel convenzionale è conforme il 33,4% dei polli allevati (media da maggio a dicembre 2025).</p>
+          <p class="pillar__text">Limite: nel 2024 Fileni pubblicava una tabella requisito per requisito, e da quella risultava che nel biologico e all'aperto alcuni requisiti (trespoli, luce naturale, razze) non erano rispettati in tutti gli allevamenti. Il bilancio 2025 dichiara che ora sono al 100%, ma senza la tabella: il dato non si può controllare. Inoltre il bilancio afferma che tutti i prodotti Fileni a base di pollo rispettano l'ECC, ma anche che nel convenzionale solo un pollo su tre (33,4%) è allevato secondo questi criteri, e non spiega come le due cose stiano insieme.</p>
+          <p class="pillar__source">Fonti: Bilancio 2025, pp. 24-26; Report 2024, pp. 29-30.</p>
+        </article>
+        <article class="pillar" data-js="reveal">
+          <h3 class="pillar__title">Ambiente</h3>
+          <p class="pillar__text">I gas serra emessi direttamente da Fileni, cioè da impianti a gas, gas refrigeranti, mezzi aziendali e allevamenti (le cosiddette emissioni «Scope 1»), sono 36.712 tonnellate di CO2 equivalente nel 2025, contro 34.324 nel 2024 (+7%). L'aumento dipende però dal fatto che nel 2025 si contano per la prima volta le emissioni delle deiezioni degli animali (4.192 tonnellate): confrontando le stesse voci del 2024, le emissioni scendono a 32.520 tonnellate (−5,3%). Tutta l'elettricità acquistata è certificata come proveniente da fonti rinnovabili, che in totale coprono il 33,4% dell'energia usata (calcolato). L'acqua prelevata scende a 1.714 milioni di litri (−5,8%), tutta in zone dove l'acqua scarseggia (aree a «stress idrico»). Le confezioni riciclabili riguardano il 23,3% dei prodotti venduti in vaschetta, misurati in chilogrammi.</p>
+          <p class="pillar__text">Limite: mancano le emissioni generate lungo la filiera, fuori dagli impianti di Fileni, per esempio dalla coltivazione dei mangimi, dai trasporti e dall'uso dei prodotti (le emissioni «Scope 3»). Nel 2025 Fileni ha solo avviato uno studio preliminare per calcolarle.</p>
+          <p class="pillar__source">Fonti: Bilancio 2025, pp. 15-17, 26, 44 e 45.</p>
+        </article>
+        <article class="pillar" data-js="reveal">
+          <h3 class="pillar__title">Persone</h3>
+          <p class="pillar__text">Al 31 dicembre 2025 Fileni ha 2.509 dipendenti, il 36% donne. Dal 2022 organizza la formazione interna con l'Accademia Fileni: nel 2025 i dipendenti hanno seguito 15.704 ore di corsi, il 10,6% in più del 2024 (14.196), in media 6 ore a testa. Gli infortuni sul lavoro sono stati 89, nessuno grave e nessuno mortale, contro 83 nel 2024. Il numero da solo però inganna: nel 2025 si è anche lavorato di più (3.781.738 ore contro 3.635.998). Per questo si guarda il «tasso di infortuni», cioè quanti infortuni ci sono ogni milione di ore lavorate: a parità di ore, ci si è fatti male un po' più spesso, 23,5 volte contro 22,8 nel 2024.</p>
+          <p class="pillar__text">Limite: il tasso di infortuni sale per il terzo anno di fila (era 19,2 nel 2022) e il bilancio non spiega perché. Le ore di formazione crescono rispetto al 2024, ma restano molto sotto il 2023, quando erano 23.559.</p>
+          <p class="pillar__source">Fonti: Bilancio 2025, pp. 29, 46, 47 e 48.</p>
+        </article>
+        <article class="pillar" data-js="reveal">
+          <h3 class="pillar__title">Agricoltura biologica e biodiversità</h3>
+          <p class="pillar__text">Nel 2025 i campi coltivati a biologico per la filiera Fileni sono circa 11.360 ettari. Circa 560 sono terreni di Fileni, di proprietà o in affitto (agricoltura «diretta»); circa 10.800 sono di agricoltori che coltivano per Fileni con un contratto (agricoltura «indiretta»). Le regioni con più ettari sono le Marche (3.575), l'Emilia-Romagna (3.430) e il Veneto (1.585). Da questi campi viene oltre il 70% delle materie prime biologiche che servono per i mangimi. Con il progetto «Buon miele non mente» Fileni usa le api per controllare la salute dell'ambiente vicino agli allevamenti biologici, analizzando miele e polline: nel 2025 le arnie raddoppiano, da 72 a 144, in 6 stazioni.</p>
+          <p class="pillar__text">Limite: il bilancio 2025 non dice più quanto Fileni incassa con i prodotti biologici (95 milioni di euro nel 2024). C'è poi un probabile errore nella mappa degli ettari per regione: la legenda dice che sono terreni di Fileni, ma i numeri sommano 10.800 ettari, cioè quelli degli agricoltori con contratto.</p>
+          <p class="pillar__source">Fonti: Bilancio 2025, pp. 5, 18, 22 e 23; Report 2024, p. 13.</p>
+        </article>
+        <article class="pillar" data-js="reveal">
+          <h3 class="pillar__title">Territorio e stakeholder</h3>
+          <p class="pillar__text">Fileni fa parte di 17 associazioni, tra cui Unaitalia, che rappresenta le filiere italiane di carni e uova, Assobio, per il biologico, e Assobenefit, per le Società Benefit. Collabora con tre università: l'Università Politecnica delle Marche, l'Università di Camerino e l'Università degli Studi di Scienze Gastronomiche di Pollenzo. Nel 2025 la Fondazione Marco Fileni ha assegnato 30 borse di studio a studenti delle superiori e dell'università, per 45 mila euro. Tra le collaborazioni ci sono la Federazione Italiana Giuoco Calcio (FIGC), di cui Fileni è partner dal 2023, e Legambiente, dal 2022.</p>
+          <p class="pillar__text">Limite: la somma che il bilancio indica come distribuita alla comunità (la voce «Remunerazione della Comunità») scende da 867.580 euro nel 2024 a 547.805 nel 2025 (−36,9%, calcolato), e il bilancio non dice perché. Inoltre, nel 2025 Fileni non ha rifatto l'analisi con cui sceglie i temi più importanti su cui rendere conto (la cosiddetta «analisi di materialità»): ha confermato quella del 2024. Un'analisi nuova, con il metodo europeo della «doppia materialità», è uscita nel 2026 in un documento a parte, la nota metodologica presente nell'archivio.</p>
+          <p class="pillar__source">Fonti: Bilancio 2025, pp. 13, 32-34 e 41; Nota metodologica 2026.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="kpi" aria-labelledby="kpi-titolo">
+      <h2 class="section__title" id="kpi-titolo">Indicatori chiave 2022-2025</h2>
+      <p class="section__text">Nove indicatori su ambiente, persone ed economia, seguiti dal 2022 al 2025. Ogni tabella riporta il valore di ciascun anno e una lettura: migliora o peggiora. La barra dà solo un'idea delle proporzioni; quella tratteggiata rossa segnala un peggioramento.</p>
+      <!-- Le note di metodo sono chiuse in un riquadro: chi vuole approfondire lo apre, gli altri passano subito alle tabelle. Gli stessi limiti sono spiegati anche nella sezione «Metodo». -->
+      <details class="howto">
+        <summary class="howto__summary">Come confrontare gli anni</summary>
+        <ul class="section__list">
+          <li><strong>Da quando parte la serie.</strong> Negli anni Fileni ha incluso nei dati più società e più allevamenti. Dal 2022 i numeri comprendono le stesse attività: per questo le tabelle partono da lì.</li>
+          <li><strong>Quando cambia che cosa si conta.</strong> Nel 2025 entrano per la prima volta nuovi siti e le emissioni degli allevamenti. In questi casi la tabella mostra due righe: il totale e il valore calcolato sulle stesse voci dell'anno prima, l'unico che si può confrontare.</li>
+          <li><strong>Numeri corretti dopo.</strong> A volte Fileni corregge il numero di un anno nel bilancio successivo: qui si usa sempre la versione più recente (per esempio gli infortuni del 2022 sono 19,2, non 20,8; il particolato del 2024 è 4.342 kg, non 26.871).</li>
+          <li><strong>Dati mancanti.</strong> Se un numero non è pubblicato compare «n.d.», cioè non disponibile: nessuna stima.</li>
+          <li><strong>Rifiuti.</strong> Dal 2024 si contano anche i fanghi degli impianti: il 2024 e il 2025 si confrontano tra loro, non con gli anni prima.</li>
+        </ul>
+      </details>
+      <div class="section__grid section__grid--wide">
+        <figure class="kpi-chart" data-js="reveal">
+          <h3 class="kpi-chart__title">Emissioni dirette (Scope 1)</h3>
+          <table class="kpi-chart__table">
+            <caption>Emissioni Scope 1 in tonnellate di CO2 equivalente. Fonti: 2022, Bilancio 2022, p. 51; 2023, Report 2024, p. 53; 2024 e 2025, Bilancio 2025, pp. 16 e 45 (pagine del PDF).</caption>
+            <thead>
+              <tr><th scope="col">Anno</th><th scope="col">Valore</th><th scope="col">Lettura</th></tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">2022</th><td class="kpi-chart__cell" style="--v: 0.78">28.477&nbsp;tCO2e</td><td>Primo anno della serie</td></tr>
+              <tr><th scope="row">2023</th><td class="kpi-chart__cell" style="--v: 0.63">23.303&nbsp;tCO2e</td><td>In miglioramento, −18,2% sul 2022</td></tr>
+              <tr><th scope="row">2024</th><td class="kpi-chart__cell kpi-chart__cell--worse" style="--v: 0.93">34.324&nbsp;tCO2e</td><td>In peggioramento, +47,3% sul 2023 (rottura di un compressore)</td></tr>
+              <tr><th scope="row">2025, a perimetro omogeneo</th><td class="kpi-chart__cell" style="--v: 0.89">32.520&nbsp;tCO2e</td><td>In miglioramento, −5,3% sul 2024</td></tr>
+              <tr><th scope="row">2025, con la gestione delle deiezioni</th><td class="kpi-chart__cell" style="--v: 1.00">36.712&nbsp;tCO2e</td><td>Non confrontabile: comprende per la prima volta 4.192&nbsp;tCO2e dalle deiezioni negli allevamenti</td></tr>
+            </tbody>
+          </table>
+          <p class="kpi-chart__note">Il 2024 è gonfiato dalla perdita di circa 11.700 tCO2e di gas refrigeranti per la rottura di un compressore; anche il 2022 è un anno anomalo per manutenzioni straordinarie sui refrigeranti. Il valore a perimetro omogeneo del 2025 esclude le deiezioni, che nel 2024 non erano calcolate; comprende però i nuovi siti entrati nel perimetro. Negli highlights del bilancio 2025 la quota delle deiezioni è scritta 4.292, nel testo e nelle tabelle 4.192: si riporta la tabella. Lo Scope 3 non è rendicontato. Intensità emissiva: 0,108 kgCO2e/kg nel 2024, 0,107 nel 2025.</p>
+        </figure>
+        <figure class="kpi-chart" data-js="reveal">
+          <h3 class="kpi-chart__title">Quota di energia da fonti rinnovabili</h3>
+          <table class="kpi-chart__table">
+            <caption>Quota percentuale dei consumi energetici coperta da fonti rinnovabili, calcolata sui GJ riportati dai report. Fonti: 2022, Bilancio 2022, p. 50; 2023 e 2024, Report 2024, p. 52; 2024 rideterminato e 2025, Bilancio 2025, p. 44.</caption>
+            <thead>
+              <tr><th scope="col">Anno</th><th scope="col">Valore</th><th scope="col">Lettura</th></tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">2022</th><td class="kpi-chart__cell" style="--v: 0.82">27,7%</td><td>Primo anno della serie</td></tr>
+              <tr><th scope="row">2023</th><td class="kpi-chart__cell" style="--v: 0.87">29,4%</td><td>In miglioramento, +1,7 punti sul 2022</td></tr>
+              <tr><th scope="row">2024, metodo precedente</th><td class="kpi-chart__cell" style="--v: 0.89">30,3%</td><td>In miglioramento, +0,9 punti sul 2023</td></tr>
+              <tr><th scope="row">2024, metodo 2025 (con il biogas)</th><td class="kpi-chart__cell" style="--v: 1.00">33,9%</td><td>Valore rideterminato dal bilancio 2025</td></tr>
+              <tr><th scope="row">2025, metodo 2025 (con il biogas)</th><td class="kpi-chart__cell kpi-chart__cell--worse" style="--v: 0.99">33,4%</td><td>In lieve calo, −0,5 punti sul 2024 rideterminato</td></tr>
+            </tbody>
+          </table>
+          <p class="kpi-chart__note">Valori calcolati in questo lavoro (GJ da fonti rinnovabili divisi per GJ totali), non dichiarati come percentuale dai report. Dal bilancio 2025 la parte rinnovabile comprende il biogas autoprodotto: il 2024 passa da 176.878 a 198.038 GJ rinnovabili. Con il metodo precedente il 2025 sarebbe il 30,3%, come il 2024 (calcolato). I consumi totali crescono (583.681 GJ nel 2024, 589.732 nel 2025), mentre l'intensità energetica scende da 1,83 a 1,72 MJ/kg di prodotto (−6%).</p>
+        </figure>
+        <figure class="kpi-chart" data-js="reveal">
+          <h3 class="kpi-chart__title">Intensità idrica</h3>
+          <table class="kpi-chart__table">
+            <caption>Litri di acqua prelevata per chilogrammo di prodotto. Fonti: 2022, Bilancio 2022, p. 51; 2023, Report 2024, p. 53; 2024 e 2025, Bilancio 2025, p. 45.</caption>
+            <thead>
+              <tr><th scope="col">Anno</th><th scope="col">Valore</th><th scope="col">Lettura</th></tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">2022</th><td class="kpi-chart__cell" style="--v: 0.88">5,04&nbsp;l/kg</td><td>Primo anno della serie</td></tr>
+              <tr><th scope="row">2023</th><td class="kpi-chart__cell kpi-chart__cell--worse" style="--v: 0.94">5,35&nbsp;l/kg</td><td>In peggioramento, +6,2% sul 2022</td></tr>
+              <tr><th scope="row">2024</th><td class="kpi-chart__cell kpi-chart__cell--worse" style="--v: 1.00">5,70&nbsp;l/kg</td><td>In peggioramento, +6,5% sul 2023</td></tr>
+              <tr><th scope="row">2025</th><td class="kpi-chart__cell" style="--v: 0.88">4,99&nbsp;l/kg</td><td>In miglioramento, −12,4% sul 2024</td></tr>
+            </tbody>
+          </table>
+          <p class="kpi-chart__note">L'acqua prelevata in totale è di 1.678 milioni di litri nel 2022, 1.745 nel 2023, 1.819 nel 2024 e 1.714 nel 2025 (−5,8%): tutta in zone dove l'acqua scarseggia (aree a «stress idrico»), come negli anni prima. Per il 2023 si usa il valore corretto da Fileni nel bilancio successivo: la versione preliminare del report 2023 diceva 1.735. Il −12,4% del 2025 è quello indicato dal bilancio; facendo il conto sui valori arrotondati verrebbe −12,5%.</p>
+        </figure>
+        <figure class="kpi-chart" data-js="reveal">
+          <h3 class="kpi-chart__title">Rifiuti prodotti</h3>
+          <table class="kpi-chart__table">
+            <caption>Rifiuti prodotti in tonnellate. Fonti: 2022, Bilancio 2023, p. 55; 2023, Report 2024, p. 53; 2024 e 2025, Bilancio 2025, p. 45. Le barre hanno due scale: 2022-2023 sul 2022, 2024-2025 sul 2024, perché dal 2024 il valore comprende i fanghi.</caption>
+            <thead>
+              <tr><th scope="col">Anno</th><th scope="col">Valore</th><th scope="col">Lettura</th></tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">2022</th><td class="kpi-chart__cell" style="--v: 1.00">7.556&nbsp;t</td><td>Primo anno della serie</td></tr>
+              <tr><th scope="row">2023</th><td class="kpi-chart__cell" style="--v: 0.84">6.341&nbsp;t</td><td>In miglioramento, −16,1% sul 2022</td></tr>
+              <tr><th scope="row">2024</th><td class="kpi-chart__cell" style="--v: 1.00">29.664&nbsp;t</td><td>Non confrontabile con gli anni prima: include i fanghi monitorati dal 2024</td></tr>
+              <tr><th scope="row">2025</th><td class="kpi-chart__cell" style="--v: 0.96">28.356&nbsp;t</td><td>In miglioramento, −4,4% sul 2024</td></tr>
+            </tbody>
+          </table>
+          <p class="kpi-chart__note">I fanghi valgono circa 22.000 t nel 2024 e circa 20.000 nel 2025; nel 2025 sono recuperati come materiale organico negli impianti di digestione anaerobica per produrre biogas. Il 2022 include gli allevamenti di proprietà, assenti negli anni prima. Il 2023 è riesposto (6.341 t; 6.110 nella versione preliminare del report 2023). Per il 2025 il testo del bilancio indica 28.357 t e la tabella 28.356: si riporta la tabella. Nel 2025 il 94,2% dei rifiuti è avviato a recupero.</p>
+        </figure>
+        <figure class="kpi-chart" data-js="reveal">
+          <h3 class="kpi-chart__title">Packaging riciclabile</h3>
+          <table class="kpi-chart__table">
+            <caption>Quota dei chilogrammi venduti con vassoio in confezioni riciclabili. Fonti: 2022, Relazione d'impatto 2022, p. 8; 2023 e 2024, Report 2024, p. 24; 2025, Bilancio 2025, p. 26.</caption>
+            <thead>
+              <tr><th scope="col">Anno</th><th scope="col">Valore</th><th scope="col">Lettura</th></tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">2022</th><td class="kpi-chart__cell" style="--v: 1.00">29,4%</td><td>Primo anno della serie</td></tr>
+              <tr><th scope="row">2023</th><td class="kpi-chart__cell kpi-chart__cell--worse" style="--v: 0.95">28%</td><td>In calo, −1,4 punti sul 2022</td></tr>
+              <tr><th scope="row">2024</th><td class="kpi-chart__cell" style="--v: 0.99">29,1%</td><td>In miglioramento, +1,1 punti sul 2023</td></tr>
+              <tr><th scope="row">2025, solo «riciclabile»</th><td class="kpi-chart__cell kpi-chart__cell--worse" style="--v: 0.79">23,3%</td><td>In calo, −5,8 punti sul 2024, ma con una definizione diversa</td></tr>
+            </tbody>
+          </table>
+          <p class="kpi-chart__note">Fino al 2024 il dato contava le confezioni «riciclabili o compostabili»; il bilancio 2025 parla solo di confezioni «riciclabili» e non commenta né il calo né il cambio di definizione. Non si può quindi dire quanta parte del calo sia reale.</p>
+        </figure>
+        <figure class="kpi-chart" data-js="reveal">
+          <h3 class="kpi-chart__title">Particolato (PM) in atmosfera</h3>
+          <table class="kpi-chart__table">
+            <caption>Emissioni di particolato in chilogrammi. Fonte: Bilancio 2025, p. 45. La serie parte dal 2024 perché il metodo di calcolo è cambiato e il bilancio 2025 ha rideterminato solo il 2024.</caption>
+            <thead>
+              <tr><th scope="col">Anno</th><th scope="col">Valore</th><th scope="col">Lettura</th></tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">2024, stabilimenti (rideterminato)</th><td class="kpi-chart__cell" style="--v: 1.00">4.342&nbsp;kg</td><td>Primo anno della serie con il nuovo metodo</td></tr>
+              <tr><th scope="row">2025, stabilimenti</th><td class="kpi-chart__cell" style="--v: 0.72">3.140&nbsp;kg</td><td>In miglioramento, −27,7% sul 2024</td></tr>
+              <tr><th scope="row">2025, con gli allevamenti</th><td class="kpi-chart__cell" style="--v: 0.00">318.970&nbsp;kg</td><td>Non confrontabile: gli allevamenti entrano per la prima volta nel perimetro</td></tr>
+            </tbody>
+          </table>
+          <p class="kpi-chart__note">Gli stabilimenti sono Cingoli, Castelplanio, Longiano e Jesi. Il report 2024 indicava 26.871 kg per il 2024, circa dieci volte il 2023 (2.729 kg); il bilancio 2025 ha rifatto il calcolo con una conversione più puntuale del flusso di massa e lo ha portato a 4.342 kg. Il 2023 resta calcolato con il metodo precedente e non è confrontabile. Il dato con gli allevamenti non ha barra: è circa cento volte quello dei soli stabilimenti e schiaccerebbe le altre righe.</p>
+        </figure>
+        <figure class="kpi-chart" data-js="reveal">
+          <h3 class="kpi-chart__title">Ore di formazione dei dipendenti</h3>
+          <table class="kpi-chart__table">
+            <caption>Ore di formazione dei soli dipendenti. Fonti: 2022, Bilancio 2023, p. 58; 2023, Report 2024, p. 56; 2024 e 2025, Bilancio 2025, p. 47.</caption>
+            <thead>
+              <tr><th scope="col">Anno</th><th scope="col">Valore</th><th scope="col">Lettura</th></tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">2022</th><td class="kpi-chart__cell" style="--v: 0.57">13.406&nbsp;ore</td><td>Primo anno della serie</td></tr>
+              <tr><th scope="row">2023</th><td class="kpi-chart__cell" style="--v: 1.00">23.559&nbsp;ore</td><td>In miglioramento, +75,7% sul 2022</td></tr>
+              <tr><th scope="row">2024</th><td class="kpi-chart__cell kpi-chart__cell--worse" style="--v: 0.60">14.196&nbsp;ore</td><td>In peggioramento, −39,7% sul 2023</td></tr>
+              <tr><th scope="row">2025</th><td class="kpi-chart__cell" style="--v: 0.67">15.704&nbsp;ore</td><td>In miglioramento, +10,6% sul 2024</td></tr>
+            </tbody>
+          </table>
+          <p class="kpi-chart__note">Stesso perimetro (soli dipendenti) in tutti gli anni. Le ore pro capite sono 6 sia nel 2024 sia nel 2025 (11 nel 2023): il calo del 2024 non è spiegato dal report e il 2025 recupera solo in parte. Il bilancio 2025 indica anche 8.527 ore di formazione obbligatoria su salute e sicurezza sull'intera Piattaforma; non dice se siano comprese nelle 15.704, quindi non vanno sommate.</p>
+        </figure>
+        <figure class="kpi-chart" data-js="reveal">
+          <h3 class="kpi-chart__title">Tasso di infortuni registrabili</h3>
+          <table class="kpi-chart__table">
+            <caption>Infortuni registrabili dei dipendenti ogni milione di ore lavorate. Fonti: 2022, Bilancio 2023, p. 58; 2023, Report 2024, p. 57; 2024 e 2025, Bilancio 2025, p. 48.</caption>
+            <thead>
+              <tr><th scope="col">Anno</th><th scope="col">Valore</th><th scope="col">Lettura</th></tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">2022</th><td class="kpi-chart__cell" style="--v: 0.82">19,2&nbsp;per milione di ore</td><td>Primo anno della serie</td></tr>
+              <tr><th scope="row">2023</th><td class="kpi-chart__cell kpi-chart__cell--worse" style="--v: 0.94">22,1&nbsp;per milione di ore</td><td>In peggioramento, +15,1% sul 2022</td></tr>
+              <tr><th scope="row">2024</th><td class="kpi-chart__cell kpi-chart__cell--worse" style="--v: 0.97">22,8&nbsp;per milione di ore</td><td>In peggioramento, +3,2% sul 2023</td></tr>
+              <tr><th scope="row">2025</th><td class="kpi-chart__cell kpi-chart__cell--worse" style="--v: 1.00">23,5&nbsp;per milione di ore</td><td>In peggioramento, +3,1% sul 2024</td></tr>
+            </tbody>
+          </table>
+          <p class="kpi-chart__note">Il valore 2022 è riesposto: il Bilancio 2022 riportava 20,8, il Bilancio 2023 riporta 19,2 e si cita quest'ultimo. Nel 2025 gli infortuni registrabili sono 89 su 3.781.738 ore lavorate (83 nel 2024), nessuno grave e nessun decesso; i casi di malattia professionale denunciati scendono da 74 a 52.</p>
+        </figure>
+        <figure class="kpi-chart" data-js="reveal">
+          <h3 class="kpi-chart__title">Fatturato biologico</h3>
+          <table class="kpi-chart__table">
+            <caption>Fatturato dei prodotti biologici in milioni di euro. Fonti: 2022, Bilancio 2022, p. 15; 2023, Bilancio 2023, p. 14; 2024, Report 2024, p. 13; il 2025 non è presente nel bilancio 2025.</caption>
+            <thead>
+              <tr><th scope="col">Anno</th><th scope="col">Valore</th><th scope="col">Lettura</th></tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">2022</th><td class="kpi-chart__cell" style="--v: 0.98">98&nbsp;M&nbsp;EUR</td><td>Primo anno della serie</td></tr>
+              <tr><th scope="row">2023</th><td class="kpi-chart__cell" style="--v: 1.00">100&nbsp;M&nbsp;EUR</td><td>In miglioramento, +2,0% sul 2022</td></tr>
+              <tr><th scope="row">2024</th><td class="kpi-chart__cell kpi-chart__cell--worse" style="--v: 0.95">95&nbsp;M&nbsp;EUR</td><td>In peggioramento, −5,0% sul 2023</td></tr>
+              <tr><th scope="row">2025</th><td class="kpi-chart__cell" style="--v: 0.00">n.d.</td><td>Dato non presente nel bilancio 2025</td></tr>
+            </tbody>
+          </table>
+          <p class="kpi-chart__note">Il fatturato biologico del 2020 e del 2021 non è presente nelle fonti consultate (n.d.). Nel 2024 comprende 79 M EUR di carne bianca. Il fatturato netto del Gruppo è invece 609 (2022), 622 (2023), 612 (2024) e 680 M EUR (2025).</p>
+        </figure>
+
+      </div>
+    </section>
+
+    <section class="section archive" id="report" aria-labelledby="report-titolo" data-js="archive">
+      <h2 class="section__title" id="report-titolo">Archivio dei report</h2>
+      <!-- Il filtro compare solo con JavaScript attivo. Senza script resta l'indice per anno qui sotto. -->
+      <form class="archive-filter" data-js="archive-filter" role="search" aria-label="Filtra l'archivio" hidden>
+        <fieldset class="archive-filter__fields">
+          <legend>Filtra i report</legend>
+          <div class="archive-filter__field">
+            <label for="filtro-testo">Cerca nel titolo e nei dati</label>
+            <input type="search" id="filtro-testo" name="testo" autocomplete="off">
+          </div>
+          <div class="archive-filter__field">
+            <label for="filtro-anno">Anno</label>
+            <select id="filtro-anno" name="anno">
+              <option value="">Tutti gli anni</option>
+              <option>2026</option>
+              <option>2025</option>
+              <option>2024</option>
+              <option>2023</option>
+              <option>2022</option>
+              <option>2020</option>
+            </select>
+          </div>
+          <div class="archive-filter__field">
+            <label for="filtro-tipo">Tipo di documento</label>
+            <select id="filtro-tipo" name="tipo">
+              <option value="">Tutti i tipi</option>
+              <option value="bilancio">Bilancio di sostenibilità</option>
+              <option value="relazione-impatto">Relazione d'impatto</option>
+              <option value="nota-dma">Nota metodologica</option>
+            </select>
+          </div>
+          <button type="reset" class="archive-filter__reset">Azzera i filtri</button>
+        </fieldset>
+      </form>
+      <!-- Qui compaiono le chip dei filtri attivi, che crea archive.js. Finche' non si sceglie un filtro questo spazio resta vuoto e nascosto. -->
+      <div class="chips" data-js="archive-chips" role="group" aria-label="Filtri attivi" hidden></div>
+      <p class="archive__status" role="status" data-js="archive-status"></p>
+      <!-- Indice per anno: serve a chi non ha JavaScript e quindi non vede il filtro. Con lo script attivo lo nascondo, perche' ci sono gia' filtro e chip. -->
+      <nav class="archive__index" aria-label="Anni dell'archivio">
+        <ul class="archive__years">
+          <li><a class="archive__link" href="#anno-2026">2026</a></li>
+          <li><a class="archive__link" href="#anno-2025">2025</a></li>
+          <li><a class="archive__link" href="#anno-2024">2024</a></li>
+          <li><a class="archive__link" href="#anno-2023">2023</a></li>
+          <li><a class="archive__link" href="#anno-2022">2022</a></li>
+          <li><a class="archive__link" href="#anno-2020">2020</a></li>
+        </ul>
+      </nav>
+
+      <h3 class="archive__year" id="anno-2026">2026</h3>
+      <ul class="archive__list">
+        <li class="report" data-year="2026" data-type="nota-dma" data-lang="it">
+          <h4 class="report__title">Nota metodologica sull'analisi di doppia materialità 2026</h4>
+          <dl class="report__meta"><div class="report__meta-item"><dt>Tipo</dt><dd>Nota metodologica</dd></div><div class="report__meta-item"><dt>Lingua</dt><dd>italiano</dd></div><div class="report__meta-item"><dt>Pagine</dt><dd>16</dd></div><div class="report__meta-item"><dt>Dimensione</dt><dd>0,8 MB</dd></div></dl>
+          <ul class="report__links"><li><a class="report__link" href="https://www.fileni.it/wp-content/uploads/2026/09/analisi-di-materialita.pdf" type="application/pdf" rel="external noopener" target="_blank"><span>Nota metodologica sulla doppia materialità (CSRD) 2026, italiano</span> (PDF – 0,8 MB)<span class="visually-hidden"> — si apre il sito di Fileni in una nuova scheda</span></a></li></ul>
+        </li>
+      </ul>
+
+      <h3 class="archive__year" id="anno-2025">2025</h3>
+      <ul class="archive__list">
+        <li class="report report--latest" data-year="2025" data-type="bilancio" data-lang="it">
+          <h4 class="report__title">Bilancio di sostenibilità 2025 — Un impegno che dura nel tempo <span class="report__badge report__badge--latest">Ultimo report</span></h4>
+          <dl class="report__meta"><div class="report__meta-item"><dt>Tipo</dt><dd>Bilancio di sostenibilità</dd></div><div class="report__meta-item"><dt>Lingua</dt><dd>italiano</dd></div><div class="report__meta-item"><dt>Pagine</dt><dd>57</dd></div><div class="report__meta-item"><dt>Dimensione</dt><dd>17,6 MB</dd></div></dl>
+          <ul class="report__links"><li class="report__row"><a class="report__link" href="https://www.fileni.it/wp-content/uploads/2026/11/bilancio-sostenibilita-2025_fileni.pdf" type="application/pdf" rel="external noopener" target="_blank"><span>Bilancio di sostenibilità 2025, italiano</span> (PDF – 17,6 MB)<span class="visually-hidden"> — si apre il sito di Fileni in una nuova scheda</span></a><span class="tip" data-js="tip"><a class="report__link report__link--alt" href="report/fileni-bilancio-sostenibilita-2025.pdf" type="application/pdf" download aria-describedby="perche-copia-2025">Copia di riserva<span class="visually-hidden">: Bilancio di sostenibilità 2025, italiano (PDF – 17,6 MB), file di questo sito</span></a><span class="tip__text" id="perche-copia-2025" role="tooltip">Copia conservata in questo sito nel caso il link di Fileni smetta di funzionare. È offerta solo per i due bilanci più recenti, da cui vengono i dati della pagina, per contenere il peso del sito.</span></span></li></ul>
+        </li>
+      </ul>
+
+      <h3 class="archive__year" id="anno-2024">2024</h3>
+      <ul class="archive__list">
+        <li class="report" data-year="2024" data-type="bilancio" data-lang="it">
+          <h4 class="report__title">Bilancio di sostenibilità 2024 — Il nostro percorso</h4>
+          <dl class="report__meta"><div class="report__meta-item"><dt>Tipo</dt><dd>Bilancio di sostenibilità</dd></div><div class="report__meta-item"><dt>Lingua</dt><dd>italiano</dd></div><div class="report__meta-item"><dt>Pagine</dt><dd>65</dd></div><div class="report__meta-item"><dt>Dimensione</dt><dd>14,9 MB</dd></div></dl>
+          <ul class="report__links"><li class="report__row"><a class="report__link" href="https://www.fileni.it/wp-content/uploads/2025/07/Report_Fileni_2024.pdf" type="application/pdf" rel="external noopener" target="_blank"><span>Report di sostenibilità 2024, italiano</span> (PDF – 14,9 MB)<span class="visually-hidden"> — si apre il sito di Fileni in una nuova scheda</span></a><span class="tip" data-js="tip"><a class="report__link report__link--alt" href="report/fileni-bilancio-sostenibilita-2024.pdf" type="application/pdf" download aria-describedby="perche-copia-2024">Copia di riserva<span class="visually-hidden">: Report di sostenibilità 2024, italiano (PDF – 14,9 MB), file di questo sito</span></a><span class="tip__text" id="perche-copia-2024" role="tooltip">Copia conservata in questo sito nel caso il link di Fileni smetta di funzionare. È offerta solo per i due bilanci più recenti, da cui vengono i dati della pagina, per contenere il peso del sito.</span></span></li></ul>
+        </li>
+        <li class="report" data-year="2024" data-type="relazione-impatto" data-lang="it">
+          <h4 class="report__title">Relazione d'impatto 2024 (Società Benefit)</h4>
+          <dl class="report__meta"><div class="report__meta-item"><dt>Tipo</dt><dd>Relazione d'impatto</dd></div><div class="report__meta-item"><dt>Lingua</dt><dd>italiano</dd></div><div class="report__meta-item"><dt>Pagine</dt><dd>13</dd></div><div class="report__meta-item"><dt>Dimensione</dt><dd>6,3 MB</dd></div></dl>
+          <ul class="report__links"><li><a class="report__link" href="https://www.fileni.it/wp-content/uploads/2025/07/Relazione-di-impatto_Fileni_2024_.pdf" type="application/pdf" rel="external noopener" target="_blank"><span>Relazione d'impatto 2024, italiano</span> (PDF – 6,3 MB)<span class="visually-hidden"> — si apre il sito di Fileni in una nuova scheda</span></a></li></ul>
+        </li>
+      </ul>
+
+      <h3 class="archive__year" id="anno-2023">2023</h3>
+      <ul class="archive__list">
+        <li class="report" data-year="2023" data-type="bilancio" data-lang="it">
+          <h4 class="report__title">Bilancio di sostenibilità 2023</h4>
+          <dl class="report__meta"><div class="report__meta-item"><dt>Tipo</dt><dd>Bilancio di sostenibilità</dd></div><div class="report__meta-item"><dt>Lingua</dt><dd>italiano</dd></div><div class="report__meta-item"><dt>Pagine</dt><dd>68</dd></div><div class="report__meta-item"><dt>Dimensione</dt><dd>33,0 MB</dd></div></dl>
+          <ul class="report__links"><li><a class="report__link" href="https://www.fileni.it/wp-content/uploads/2024/07/bilancio_sostenibilita_fileni_2023.pdf" type="application/pdf" rel="external noopener" target="_blank"><span>Bilancio di sostenibilità 2023, italiano</span> (PDF – 33,0 MB)<span class="visually-hidden"> — si apre il sito di Fileni in una nuova scheda</span></a></li></ul>
+        </li>
+      </ul>
+
+      <h3 class="archive__year" id="anno-2022">2022</h3>
+      <ul class="archive__list">
+        <li class="report" data-year="2022" data-type="bilancio" data-lang="it">
+          <h4 class="report__title">Bilancio di sostenibilità 2022</h4>
+          <dl class="report__meta"><div class="report__meta-item"><dt>Tipo</dt><dd>Bilancio di sostenibilità</dd></div><div class="report__meta-item"><dt>Lingua</dt><dd>italiano</dd></div><div class="report__meta-item"><dt>Pagine</dt><dd>61</dd></div><div class="report__meta-item"><dt>Dimensione</dt><dd>33,9 MB</dd></div></dl>
+          <ul class="report__links"><li><a class="report__link" href="https://www.fileni.it/wp-content/uploads/2023/12/01_Bilancio-impaginato-FILENI-22-12-web_in.pdf" type="application/pdf" rel="external noopener" target="_blank"><span>Bilancio di sostenibilità 2022, italiano</span> (PDF – 33,9 MB)<span class="visually-hidden"> — si apre il sito di Fileni in una nuova scheda</span></a></li></ul>
+        </li>
+        <li class="report" data-year="2022" data-type="relazione-impatto" data-lang="it">
+          <h4 class="report__title">Relazione d'impatto 2022 (Società Benefit)</h4>
+          <dl class="report__meta"><div class="report__meta-item"><dt>Tipo</dt><dd>Relazione d'impatto</dd></div><div class="report__meta-item"><dt>Lingua</dt><dd>italiano</dd></div><div class="report__meta-item"><dt>Pagine</dt><dd>13</dd></div><div class="report__meta-item"><dt>Dimensione</dt><dd>4,7 MB</dd></div></dl>
+          <ul class="report__links"><li><a class="report__link" href="https://www.fileni.it/wp-content/uploads/2023/12/02_Relazione-dimpatto-FILENI-22-12-web_in.pdf" type="application/pdf" rel="external noopener" target="_blank"><span>Relazione d'impatto 2022, italiano</span> (PDF – 4,7 MB)<span class="visually-hidden"> — si apre il sito di Fileni in una nuova scheda</span></a></li></ul>
+        </li>
+      </ul>
+
+      <h3 class="archive__year" id="anno-2020">2020</h3>
+      <ul class="archive__list">
+        <li class="report" data-year="2020" data-type="bilancio" data-lang="it">
+          <h4 class="report__title">Bilancio di sostenibilità 2020</h4>
+          <dl class="report__meta"><div class="report__meta-item"><dt>Tipo</dt><dd>Bilancio di sostenibilità</dd></div><div class="report__meta-item"><dt>Lingua</dt><dd>italiano</dd></div><div class="report__meta-item"><dt>Pagine</dt><dd>68</dd></div><div class="report__meta-item"><dt>Dimensione</dt><dd>8,5 MB</dd></div></dl>
+          <ul class="report__links"><li><a class="report__link" href="https://www.fileni.it/wp-content/uploads/2021/06/105-21-Bilancio-Fileni-2020.pdf" type="application/pdf" rel="external noopener" target="_blank"><span>Bilancio di sostenibilità 2020, italiano</span> (PDF – 8,5 MB)<span class="visually-hidden"> — si apre il sito di Fileni in una nuova scheda</span></a></li></ul>
+        </li>
+      </ul>
+
+      <!-- I documenti che non ho trovato online li elenco solo qui, a parole: niente voci o link inventati. -->
+      <p class="archive__note">Documenti non presenti in questo archivio: i bilanci di sostenibilità 2019 e 2021 e le relazioni d'impatto 2021, 2023 e 2025 non sono stati reperiti online al 19 novembre 2026 e quindi non sono elencati.</p>
+      <p class="archive__note">I documenti sono di proprietà di Fileni e sono riprodotti qui a scopo didattico. Il collegamento principale porta sempre al file originale sul sito di Fileni; la copia di riserva è offerta solo per i due bilanci più recenti.</p>
+    </section>
+
+    <section class="section" id="metodo" aria-labelledby="metodo-titolo">
+      <h2 class="section__title" id="metodo-titolo">Metodo, limiti e fonti</h2>
+      <!-- Illustrazione del capitolo, solo decorativa: i lettori di schermo la saltano e sul telefono non compare. -->
+      <svg class="section__art" viewBox="0 0 400 300" aria-hidden="true" focusable="false">
+        <circle class="art-bg" cx="200" cy="150" r="140"/>
+        <rect class="art-soft2" x="160" y="52" width="130" height="172" rx="12" transform="rotate(6 225 138)"/>
+        <rect class="art-paper art-line" x="122" y="66" width="130" height="172" rx="12"/>
+        <path class="art-line" d="M144 100h76M144 120h86M144 140h60"/>
+        <path class="art-line art-thick" d="M150 214v-22M170 214v-36M190 214v-26M210 214v-46"/>
+        <circle class="art-glass art-line" cx="262" cy="182" r="38"/>
+        <path class="art-line art-thick" d="M290 210l34 34"/>
+        <circle class="art-fill" cx="120" cy="80" r="20"/>
+        <path class="art-check" d="M111 80l6 6 12-12"/>
+      </svg>
+      <h3 class="section__subtitle">Come sono stati scelti e verificati i dati</h3>
+      <p class="section__text">Tutti i numeri provengono dai bilanci di sostenibilità e dai documenti di Fileni elencati nell'archivio, e sono stati riletti sulle pagine dei PDF. I dati del 2025, e i valori del 2024 che il nuovo bilancio corregge, vengono dal Bilancio 2025. Le pagine citate sono quelle del PDF, non quelle stampate. Le variazioni percentuali e le quote segnate come «calcolato» non sono dichiarate da Fileni: sono ricavate dai valori pubblicati. Non sono stati usati documenti riservati: solo file pubblici sul sito di Fileni. Sono mostrati anche i dati sfavorevoli, perché una pagina che li omettesse non rappresenterebbe i report.</p>
+      <h3 class="section__subtitle">Limiti dei dati: cosa tenere presente</h3>
+      <!-- Un limite per riga: si legge subito il succo e la spiegazione si apre con un clic. Funziona anche senza JavaScript, le icone sono solo decorative. -->
+      <ul class="folds">
+        <li>
+          <details class="fold">
+            <summary class="fold__summary"><svg class="fold__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 18h10a4 4 0 0 0 .6-7.96A6 6 0 0 0 6.1 11.6 3.3 3.3 0 0 0 7 18z"/></svg><span class="fold__head"><span class="fold__title">Emissioni</span><span class="fold__key">L'aumento del 2025 viene da voci contate per la prima volta.</span></span></summary>
+            <p class="fold__text">Nel 2025 le emissioni dirette crescono del 7% (36.712 tonnellate di CO2 equivalente contro 34.324), ma soprattutto perché si contano cose nuove: alcuni siti entrati nel 2025 e, per la prima volta, le deiezioni degli animali (4.192 tonnellate). Confrontando le stesse voci del 2024, calano del 5,3%. Anche il 2024 è un anno particolare: la rottura di un compressore ha disperso gas refrigeranti per circa 11.700 tonnellate. Mancano del tutto le emissioni della filiera fuori da Fileni (fornitori, trasporti, uso dei prodotti), per cui è stato avviato solo uno studio preliminare.</p>
+          </details>
+        </li>
+        <li>
+          <details class="fold">
+            <summary class="fold__summary"><svg class="fold__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v5M14 11v5"/></svg><span class="fold__head"><span class="fold__title">Rifiuti</span><span class="fold__key">Il salto del 2024 non è un aumento reale.</span></span></summary>
+            <p class="fold__text">Dal 2024 Fileni conta anche i fanghi degli impianti di depurazione (circa 22.000 tonnellate nel 2024, circa 20.000 nel 2025), che prima non erano conteggiati. Per questo i rifiuti del 2024 sembrano quasi cinque volte quelli del 2023, ma non è un aumento reale. Il 2024 e il 2025, che li contano entrambi, si possono confrontare: −4,4%.</p>
+          </details>
+        </li>
+        <li>
+          <details class="fold">
+            <summary class="fold__summary"><svg class="fold__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/></svg><span class="fold__head"><span class="fold__title">Acqua</span><span class="fold__key">Tutta da zone dove scarseggia, ma per Fileni non è un tema prioritario.</span></span></summary>
+            <p class="fold__text">Tutta l'acqua che Fileni preleva, 1.714 milioni di litri nel 2025, viene da zone dove l'acqua scarseggia. Eppure, nella nota metodologica del 2026 con cui Fileni sceglie i temi più importanti, l'acqua resta sotto la soglia ed è considerata non prioritaria (punteggi 3,2 e 3,0, con una soglia di 4). È una scelta di metodo legittima, ma i due fatti vanno letti insieme.</p>
+          </details>
+        </li>
+        <li>
+          <details class="fold">
+            <summary class="fold__summary"><svg class="fold__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 9h11a3 3 0 1 0-3-3M3 15h15a3 3 0 1 1-3 3M3 12h7"/></svg><span class="fold__head"><span class="fold__title">Particolato</span><span class="fold__key">Il balzo del 2024 dipendeva dal calcolo, poi rifatto.</span></span></summary>
+            <p class="fold__text">Sono le polveri emesse nell'aria. Il report 2024 indicava per il 2024 un valore circa dieci volte quello del 2023; nel bilancio 2025 Fileni ha rifatto il calcolo e lo ha corretto da 26.871 a 4.342 kg. L'aumento dipendeva quindi soprattutto da come si faceva il conto. Dal 2025 il dato comprende anche gli allevamenti (318.970 kg in totale), e lo stesso vale per l'ammoniaca: questi totali non si possono confrontare con gli anni prima.</p>
+          </details>
+        </li>
+        <li>
+          <details class="fold">
+            <summary class="fold__summary"><svg class="fold__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/></svg><span class="fold__head"><span class="fold__title">Benessere animale</span><span class="fold__key">Il pieno rispetto dichiarato nel biologico non si può più controllare.</span></span></summary>
+            <p class="fold__text">Il bilancio 2025 dichiara il pieno rispetto dei requisiti ECC nel biologico e all'aperto, ma non pubblica più la tabella requisito per requisito che nel 2024 mostrava alcuni requisiti sotto il 100%: il miglioramento non si può controllare. Nel convenzionale è conforme un pollo su tre (33,4%), anche se tutti i prodotti Fileni a base di pollo sono dichiarati ECC. I 659.283 metri quadrati di allevamenti conformi sono la capacità massima dei centri, non la superficie effettivamente usata.</p>
+          </details>
+        </li>
+        <li>
+          <details class="fold">
+            <summary class="fold__summary"><svg class="fold__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M13 3 5 14h6l-1 7 8-11h-6z"/></svg><span class="fold__head"><span class="fold__title">Energia rinnovabile</span><span class="fold__key">La quota non cresce: è cambiato il modo di contarla.</span></span></summary>
+            <p class="fold__text">Nel 2025 Fileni ha cambiato il modo di contare l'energia rinnovabile: ora include anche il biogas che produce dagli scarti. Con il nuovo metodo la quota del 2024 sale dal 30,3% al 33,9% e quella del 2025 è il 33,4%. Con il metodo vecchio anche il 2025 sarebbe il 30,3%: nei fatti la quota non cresce.</p>
+          </details>
+        </li>
+        <li>
+          <details class="fold">
+            <summary class="fold__summary"><svg class="fold__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 4 2.5 20h19zM12 10v4M12 17h.01"/></svg><span class="fold__head"><span class="fold__title">Errori nei documenti</span><span class="fold__key">Alcuni numeri del bilancio 2025 non coincidono tra loro.</span></span></summary>
+            <p class="fold__text">Il bilancio 2025 a volte dà numeri diversi per la stessa voce: le emissioni delle deiezioni sono 4.292 tonnellate nella sintesi iniziale e 4.192 nelle tabelle, i rifiuti 28.357 tonnellate nel testo e 28.356 in tabella; nella mappa degli ettari la legenda non corrisponde ai numeri. Qui si usa sempre il valore della tabella.</p>
+          </details>
+        </li>
+        <li>
+          <details class="fold">
+            <summary class="fold__summary"><svg class="fold__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/></svg><span class="fold__head"><span class="fold__title">Controlli esterni</span><span class="fold__key">La verifica esterna è solo parziale.</span></span></summary>
+            <p class="fold__text">Il bilancio è controllato da una società esterna, Deloitte, ma con una verifica «limitata» (<span lang="en">limited assurance</span>), meno approfondita di una verifica completa (<span lang="en">reasonable assurance</span>). Alcune informazioni previste dagli standard internazionali di rendicontazione (<abbr title="Global Reporting Initiative">GRI</abbr>) non sono ancora disponibili: Fileni le annuncia dal 2027.</p>
+          </details>
+        </li>
+        <li>
+          <details class="fold">
+            <summary class="fold__summary"><svg class="fold__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 20h16M7 16V9M12 16V5M17 16v-4"/></svg><span class="fold__head"><span class="fold__title">Confronti nel tempo</span><span class="fold__key">Non ogni variazione è un cambiamento reale.</span></span></summary>
+            <p class="fold__text">Negli anni Fileni ha incluso nei dati sempre più società e allevamenti, quindi non ogni aumento o calo è un vero cambiamento. Per questo le tabelle partono dal 2022, e i valori del 2020, calcolati in modo diverso, sono esclusi.</p>
+          </details>
+        </li>
+        <li>
+          <details class="fold">
+            <summary class="fold__summary"><svg class="fold__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 3h7l5 5v13H7zM14 3v5h5"/></svg><span class="fold__head"><span class="fold__title">Documenti</span><span class="fold__key">Alcuni bilanci mancano o sono stati sostituiti.</span></span></summary>
+            <p class="fold__text">La versione preliminare del report 2023, presentata a maggio 2024, non era verificata ed è stata sostituita dal bilancio 2023 definitivo: non è nell'archivio e serve solo a segnalare due numeri poi corretti. I bilanci 2019 e 2021 non si trovano online.</p>
+          </details>
+        </li>
+      </ul>
+      <!-- Due blocchi affiancati sul computer, uno sotto l'altro sul telefono. -->
+      <div class="duo">
+        <div class="duo__col">
+          <h3 class="section__subtitle">Fonti e diritti</h3>
+          <p class="section__text">I documenti sono di proprietà di Fileni. Il collegamento principale porta sempre al file originale sul sito di Fileni; la copia di riserva esiste solo per i due bilanci più recenti ed è offerta a scopo didattico. La pagina non usa il logo né altri segni distintivi dell'azienda. Le fonti sono elencate nell'archivio con anno, lingua, pagine e dimensione.</p>
+        </div>
+        <div class="duo__col">
+          <h3 class="section__subtitle">Finalità e indipendenza</h3>
+          <p class="section__text">Questo è un progetto didattico, non affiliato a Fileni e da essa non approvato. Non è una valutazione dell'impresa: riporta ciò che i documenti pubblici dichiarano e dove i loro numeri sono, o non sono, confrontabili. Prima di ogni altro uso conviene riscontrare i valori sul documento originale.</p>
+        </div>
+      </div>
+    </section>
+
+    <!--
+      Qui tengo la dichiarazione di accessibilita' breve, pensata per chi visita la pagina.
+      Le scelte tecniche e i risultati delle verifiche sono spiegati nel README.
+    -->
+    <section class="section" id="accessibilita" aria-labelledby="accessibilita-titolo">
+      <h2 class="section__title" id="accessibilita-titolo">Dichiarazione di accessibilità</h2>
+      <!-- Illustrazione del capitolo, solo decorativa: i lettori di schermo la saltano e sul telefono non compare. -->
+      <svg class="section__art" viewBox="0 0 400 300" aria-hidden="true" focusable="false">
+        <circle class="art-bg" cx="200" cy="150" r="140"/>
+        <circle class="art-paper art-line" cx="200" cy="150" r="92"/>
+        <circle class="art-fill" cx="200" cy="98" r="13"/>
+        <path class="art-line art-thick" d="M145 126h110M200 126v50M200 176l-24 48M200 176l24 48"/>
+        <path class="art-paper art-line" d="M96 62v42l10-10 9 19 8-3-9-19h14z"/>
+        <rect class="art-paper art-line" x="288" y="202" width="58" height="40" rx="8"/>
+        <path class="art-line" d="M302 222h28M323 215l7 7-7 7"/>
+        <circle class="art-paper art-line" cx="104" cy="218" r="22"/>
+        <path class="art-fill" d="M104 196a22 22 0 0 1 0 44z"/>
+      </svg>
+      <p class="section__text">L'obiettivo è la conformità alle <span lang="en">Web Content Accessibility Guidelines</span> (WCAG) 2.2 al livello AA. La pagina resta completa e leggibile anche senza JavaScript e rispetta la preferenza «riduci movimento» del sistema.</p>
+      <ul class="section__list">
+        <li><strong>Verifiche.</strong> Lighthouse dà 100 su 100 in accessibilità, buone pratiche e SEO, sia su telefono sia su computer. axe non rileva nessun problema rispetto alle WCAG 2.1 AA, né nel tema chiaro né in quello scuro. Il contrasto dei colori è calcolato per tutte le coppie di testo e sfondo nei due temi, e la pagina è provata fino a 320 px di larghezza senza scorrimento orizzontale. Al primo caricamento pesa circa 175 KB (8 file).</li>
+        <li><strong>Limiti noti.</strong> I PDF dei report sono documenti di Fileni: la loro accessibilità non dipende da questo progetto. Le verifiche sono state fatte con strumenti automatici e prove dell'autore, non con persone che usano tecnologie assistive.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p class="site-footer__text">Progetto didattico non affiliato a Fileni. I documenti scaricabili sono di proprietà di Fileni.</p>
+    <p class="site-footer__text">Project Work di Luigi Troiano, CdS Informatica per le Aziende Digitali (L-31), Università Telematica Pegaso. Codice con licenza MIT; i report sono di Fileni Alimentare S.p.A. Società Benefit. <a href="https://github.com/luigitroiano/fileni-sostenibilita-web" target="_blank" rel="noopener">Codice sorgente su GitHub<span class="visually-hidden"> (si apre in una nuova scheda)</span></a>. Versione del 21 novembre 2026.</p>
+  </footer>
+
+  <!--
+    Pulsante per tornare in cima. E' un semplice link, quindi funziona anche senza JavaScript.
+    Punta a #top, che per lo standard HTML porta all'inizio della pagina anche se nessun
+    elemento ha quell'id. Non l'ho collegato all'intestazione perche' e' fissa e quindi gia'
+    sempre a schermo. Il pulsante compare dopo che si e' scesi un po'.
+  -->
+  <a class="to-top" href="#top">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 19V5M5.5 11.5 12 5l6.5 6.5"/></svg>
+    <span class="visually-hidden">Torna all'inizio della pagina</span>
+  </a>
+</body>
+</html>

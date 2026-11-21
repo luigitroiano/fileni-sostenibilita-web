@@ -1,0 +1,1165 @@
+/*
+  style.css - l'unico foglio di stile della pagina.
+
+  L'ordine e' questo: carattere, variabili (i «token»), azzeramento, regole di base, impaginazione,
+  componenti, movimento e preferenze di chi visita, stampa.
+
+  L'aspetto: tema chiaro di base e scuro a scelta, aloni di luce e una griglia leggera sullo
+  sfondo, titoli grandi con una sfumatura, schede semitrasparenti «in vetro» e i pilastri in una
+  griglia a riquadri. Niente librerie e niente file di immagine: icone e illustrazioni sono
+  disegni SVG scritti nella pagina.
+
+  Parto dal telefono: le regole di base funzionano gia' a 320 px, e le media query aggiungono
+  solo cio' che serve sugli schermi piu' larghi. Tutte le animazioni stanno nella sezione 6 e
+  partono solo se chi visita non ha chiesto di ridurre il movimento.
+*/
+
+/* ===== 0. Font ===== */
+
+/*
+  Il carattere e' Inter, nella versione variabile: un solo file, ospitato in questo sito, quindi
+  nessuna richiesta a servizi esterni (la licenza e' in fonts/OFL.txt). Finche' Inter non e'
+  arrivato si vede Arial, ma con le misure corrette su quelle di Inter: cosi' quando i caratteri
+  si scambiano il testo non salta.
+*/
+@font-face {
+  font-family: "Inter";
+  src: url("../fonts/inter-latin-wght-normal.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Inter fallback";
+  src: local("Arial");
+  ascent-override: 90.49%;
+  descent-override: 22.56%;
+  line-gap-override: 0%;
+  size-adjust: 107.06%;
+}
+
+/* ===== 1. Token ===== */
+
+/*
+  Tutti i colori stanno qui. Ognuno ha due valori, scritti come light-dark(chiaro, scuro): il
+  browser usa quello del tema attivo. Il tema chiaro e' quello di base, lo scuro si sceglie con
+  l'interruttore.
+
+  Ho calcolato i contrasti con la formula delle linee guida sull'accessibilita' (WCAG), nel
+  caso peggiore tra sfondo, scheda e scheda in rilievo (tema chiaro / tema scuro):
+    testo                 17,6:1 / 16,1:1   (il minimo richiesto e' 4,5:1)
+    testo attenuato        7,2:1 /  7,0:1
+    accento (link)         4,6:1 / 10,2:1
+    accento 2 (barre)      5,0:1 /  9,5:1   (per i grafici basta 3:1)
+    peggioramento          5,9:1 /  6,6:1
+    bordo dei controlli    4,3:1 /  3,7:1   (minimo 3:1)
+    focus                  5,8:1 /  8,4:1
+  Le linee sottili (--color-line) servono solo a separare, non a riconoscere un comando, quindi
+  non devono rispettare un minimo. Gli aloni sono cosi' tenui che i contrasti valgono anche sopra.
+*/
+:root {
+  color-scheme: light;
+
+  --color-bg: light-dark(#fbfcfb, #070a08);
+  --color-surface: light-dark(#ffffff, rgb(255 255 255 / 0.035));
+  --color-surface-2: light-dark(#f2f5f3, rgb(255 255 255 / 0.06));
+  --color-text: light-dark(#0a0f0b, #f2f5f3);
+  --color-muted: light-dark(#4a544e, #9ba59f);
+  --color-accent: light-dark(#15803d, #4ade80);
+  --color-accent-2: light-dark(#0f766e, #2dd4bf);
+  --color-border: light-dark(#6b756f, #6b756f);
+  --color-line: light-dark(rgb(10 15 11 / 0.1), rgb(255 255 255 / 0.09));
+  --color-grid: light-dark(rgb(10 15 11 / 0.05), rgb(255 255 255 / 0.045));
+  --color-focus: light-dark(#0b57d0, #8ab4f8);
+  --color-worse: light-dark(#b91c1c, #fb7185);
+  --glow-1: light-dark(rgb(22 163 74 / 0.16), rgb(34 197 94 / 0.2));
+  --glow-2: light-dark(rgb(13 148 136 / 0.12), rgb(45 212 191 / 0.14));
+  --color-highlight: light-dark(transparent, rgb(255 255 255 / 0.05));
+  --color-drop: light-dark(rgb(10 15 11 / 0.07), transparent);
+  --shadow: 0 1px 0 var(--color-highlight) inset, 0 1px 3px var(--color-drop);
+
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2.5rem;
+  --space-5: clamp(3.5rem, 2rem + 6vw, 7rem);
+  --radius: 0.75rem;
+  --radius-lg: 1.25rem;
+  --measure: 68ch;
+  --page: 72rem;
+
+  --font: "Inter", "Inter fallback", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+/* Il tema scelto con l'interruttore: lo script lo scrive come attributo dell'elemento html. */
+:root[data-theme="light"] { color-scheme: light; }
+:root[data-theme="dark"] { color-scheme: dark; }
+
+/* Nei browser vecchi che non conoscono light-dark() uso solo i colori del tema chiaro, cosi' la pagina resta leggibile. */
+@supports not (color: light-dark(#000, #fff)) {
+  :root {
+    --color-bg: #fbfcfb;
+    --color-surface: #ffffff;
+    --color-surface-2: #f2f5f3;
+    --color-text: #0a0f0b;
+    --color-muted: #4a544e;
+    --color-accent: #15803d;
+    --color-accent-2: #0f766e;
+    --color-border: #6b756f;
+    --color-line: rgb(10 15 11 / 0.1);
+    --color-grid: rgb(10 15 11 / 0.05);
+    --color-focus: #0b57d0;
+    --color-worse: #b91c1c;
+    --glow-1: rgb(22 163 74 / 0.16);
+    --glow-2: rgb(13 148 136 / 0.12);
+    --color-highlight: transparent;
+    --color-drop: rgb(10 15 11 / 0.07);
+  }
+}
+
+/* ===== 2. Reset minimo ===== */
+
+*, *::before, *::after { box-sizing: border-box; }
+body, h1, h2, h3, h4, p, ul, figure, dl, dd { margin: 0; }
+ul { padding: 0; list-style: none; }
+
+/* ===== 3. Base ===== */
+
+html { scroll-behavior: smooth; }
+
+/*
+  Gli aloni sono sfondi del body, quindi non serve nessun elemento o immagine in piu'.
+  overflow-x: clip evita che le decorazioni larghe quanto lo schermo facciano scorrere la pagina di lato.
+*/
+body {
+  font: 1rem/1.65 var(--font);
+  font-feature-settings: "cv11", "ss01";
+  color: var(--color-text);
+  background:
+    radial-gradient(60rem 32rem at 50% -12rem, var(--glow-1), transparent 70%),
+    radial-gradient(36rem 24rem at 92% 4rem, var(--glow-2), transparent 70%),
+    var(--color-bg);
+  background-repeat: no-repeat;
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 { line-height: 1.15; letter-spacing: -0.02em; text-wrap: balance; }
+h1 { font-size: clamp(2.25rem, 1.2rem + 4.6vw, 4.5rem); font-weight: 700; letter-spacing: -0.045em; line-height: 1.04; }
+h2 { font-size: clamp(1.75rem, 1.2rem + 2.2vw, 2.75rem); font-weight: 650; letter-spacing: -0.035em; }
+h3 { font-size: 1.15rem; font-weight: 600; }
+h4 { font-size: 1.05rem; font-weight: 600; }
+p, li { text-wrap: pretty; }
+
+/* I link nel testo restano sottolineati: il solo colore non basterebbe a riconoscerli. */
+a { color: var(--color-accent); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.22em; }
+a:hover { text-decoration-thickness: 2px; }
+
+/* Il focus della tastiera si vede sempre: un contorno di 3 px, ben contrastato in entrambi i temi. */
+:focus-visible { outline: 3px solid var(--color-focus); outline-offset: 3px; border-radius: 0.25rem; }
+:target, :focus { scroll-margin-top: var(--space-3); }
+
+::selection { background: color-mix(in srgb, var(--color-accent) 30%, transparent); }
+
+/* ===== 4. Layout ===== */
+
+main, .site-footer { width: min(100% - 2 * var(--space-2), var(--page)); margin-inline: auto; }
+
+/* Lascio spazio anche sotto ogni sezione, cosi' la linea che apre la sezione successiva non tocca il testo. */
+.section { --spazio-sopra: var(--space-5); position: relative; padding-block: var(--spazio-sopra) var(--space-4); counter-increment: sezione; }
+/* Dal secondo capitolo in poi metto meno spazio sopra, cosi' i capitoli stanno piu' vicini. */
+.section ~ .section { --spazio-sopra: var(--space-4); }
+/* Tolgo il margine all'ultimo elemento di ogni capitolo, cosi' lo spazio sotto e' uguale a quello sopra. */
+.section > :last-child, .section > :last-child > :last-child, .duo__col > :last-child { margin-bottom: 0; }
+
+/*
+  Le illustrazioni dei capitoli «Chi e' Fileni», «Metodo» e «Accessibilita'» sono solo decorative
+  e stanno accanto al testo iniziale, quando c'e' spazio. Prendono i colori dalle variabili, quindi
+  cambiano insieme al tema.
+*/
+.section__art { display: none; }
+@media (min-width: 64rem) {
+  .section__art { display: block; position: absolute; top: calc(var(--spazio-sopra) + 1rem); right: 0; width: min(24rem, calc(100% - var(--measure) - var(--space-4))); height: auto; pointer-events: none; }
+}
+.art-bg { fill: color-mix(in srgb, var(--color-accent) 6%, transparent); }
+.art-soft { fill: color-mix(in srgb, var(--color-accent) 16%, transparent); }
+.art-soft2 { fill: color-mix(in srgb, var(--color-accent-2) 12%, transparent); }
+.art-paper { fill: var(--color-surface-2); }
+.art-glass { fill: color-mix(in srgb, var(--color-accent-2) 10%, transparent); }
+.art-fill { fill: var(--color-accent); }
+.art-line { stroke: var(--color-accent); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+path.art-line:not([class*="art-paper"]):not([class*="art-soft"]) { fill: none; }
+.art-thick { stroke-width: 7; }
+.art-check { fill: none; stroke: var(--color-bg); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Due blocchi di testo affiancati, nella sezione Metodo: fonti e diritti, finalita' e indipendenza. */
+.duo { display: grid; gap: var(--space-2) var(--space-4); margin-top: var(--space-4); }
+@media (min-width: 48rem) { .duo { grid-template-columns: 1fr 1fr; } }
+.duo .section__text { max-width: none; }
+.duo .section__subtitle { margin-top: 0; }
+
+/* L'ultima sezione ha meno spazio sotto, prima del pie' di pagina. */
+#accessibilita { padding-bottom: var(--space-2); }
+
+/* La linea che separa le sezioni sfuma ai lati invece di essere un bordo pieno. */
+.section::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-line) 20%, var(--color-line) 80%, transparent);
+}
+
+/* Una griglia che decide da sola quante colonne usare: anche a 320 px non esce dalla pagina. */
+.section__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+.section__grid--wide { grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr)); }
+
+/* ===== 5. Blocchi ===== */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.skip-link {
+  position: absolute;
+  z-index: 20;
+  left: var(--space-2);
+  top: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  color: var(--color-text);
+  background: var(--color-bg);
+  border-radius: var(--radius);
+  transform: translateY(-200%);
+}
+.skip-link:focus { transform: none; }
+
+/*
+  La barra di navigazione galleggia in alto, semitrasparente. Sul telefono le sezioni stanno in un
+  menu a scomparsa. La classe js, aggiunta all'inizio della pagina prima che compaia, lo chiude
+  subito, cosi' non si vede il menu aperto per un attimo. Senza JavaScript il menu resta aperto e
+  la barra non resta fissa in alto.
+*/
+html { scroll-padding-top: 6rem; }
+.site-header {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  width: min(100% - 2 * var(--space-2), var(--page));
+  margin: 0.75rem auto 0;
+  padding: 0.4rem 0.5rem 0.4rem 0.9rem;
+  background: color-mix(in srgb, var(--color-bg) 72%, transparent);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 0.75rem 2rem -1.25rem rgb(0 0 0 / 0.45);
+  backdrop-filter: blur(14px) saturate(1.4);
+}
+.js .site-header { position: sticky; top: 0.75rem; }
+
+/* Il marchio del progetto: un simbolo inventato e il nome scritto accanto, nessun logo di altri. */
+.brand {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-height: 2.75rem;
+  margin-right: auto;
+  color: var(--color-text);
+  text-decoration: none;
+}
+.brand__mark { flex: none; width: 2.1rem; height: 2.1rem; filter: drop-shadow(0 0 0.5rem var(--glow-1)); }
+.brand__text { display: grid; line-height: 1.1; }
+.brand__name { font-size: 1.2rem; font-weight: 750; letter-spacing: -0.035em; }
+.brand__tag { font-size: 0.72rem; color: var(--color-muted); }
+
+.site-nav { order: 1; flex-basis: 100%; }
+.js .site-header:not([data-nav="open"]) .site-nav { display: none; }
+/* Quando il menu e' aperto ha uno sfondo pieno: altrimenti tra le voci si intravedrebbe sfocato il testo della pagina. */
+.site-header[data-nav="open"] { background: var(--color-bg); box-shadow: 0 1rem 2.5rem -1rem rgb(0 0 0 / 0.5); }
+.site-nav__list { display: grid; padding-block: 0.25rem; }
+/* Ogni voce e' alta almeno 44 px, cosi' si tocca facilmente anche con un dito. */
+.site-nav__link {
+  display: flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 0.85rem;
+  color: var(--color-muted);
+  font-size: 0.925rem;
+  text-decoration: none;
+  border-radius: 999px;
+}
+.site-nav__link:hover { color: var(--color-text); background: var(--color-surface-2); }
+/* La sezione che si sta leggendo (la segna nav.js): oltre al colore cambiano anche lo spessore del testo e lo sfondo. */
+.site-nav__link[aria-current] { color: var(--color-text); font-weight: 600; background: var(--color-surface-2); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 45%, transparent); }
+
+/* Il pulsante del menu: tre linee che diventano una X quando il menu e' aperto. */
+.nav-toggle, .theme-toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.75rem;
+  padding: 0;
+  color: var(--color-muted);
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  cursor: pointer;
+}
+.nav-toggle { width: 2.75rem; }
+.js .nav-toggle[hidden] { display: inline-flex; }
+.nav-toggle svg { width: 1.25rem; height: 1.25rem; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+/* Con il menu aperto le due linee esterne vanno al centro e poi ruotano: prima lo spostamento e poi la rotazione, altrimenti la X viene storta. */
+.nav-toggle line { transform-origin: 50% 50%; }
+.nav-toggle[aria-expanded="true"] line:first-child { transform: rotate(45deg) translateY(5px); }
+.nav-toggle[aria-expanded="true"] line:nth-child(2) { opacity: 0; }
+.nav-toggle[aria-expanded="true"] line:last-child { transform: rotate(-45deg) translateY(-5px); }
+
+/*
+  L'interruttore del tema: sole a sinistra, luna a destra, e un pallino che scorre sotto l'icona
+  del tema attivo. Per i lettori di schermo il nome resta «Tema scuro» e cambia solo lo stato.
+  Le misure stanno in variabili, e il pallino si centra sulle icone con lo stesso calcolo, bordo
+  compreso: se un giorno cambio le misure, resta allineato.
+*/
+.theme-toggle {
+  --largo: 4.4rem;
+  --margine: 0.55rem;
+  --icona: 1.1rem;
+  --pallino: 2.05rem;
+  justify-content: space-between;
+  width: var(--largo);
+  padding-inline: var(--margine);
+}
+.theme-toggle__icon { position: relative; z-index: 1; width: var(--icona); height: var(--icona); fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.theme-toggle__icon--moon { fill: currentColor; stroke: none; }
+.theme-toggle__knob {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--margine) + var(--icona) / 2 - var(--pallino) / 2);
+  width: var(--pallino);
+  height: var(--pallino);
+  border-radius: 50%;
+  transform: translateY(-50%);
+  background: var(--color-bg);
+  box-shadow: 0 0 0 1px var(--color-line), 0 0.25rem 0.75rem rgb(0 0 0 / 0.25);
+}
+/* Quanto si sposta il pallino: dal centro del sole al centro della luna, cioe' la larghezza meno margini, icone e bordo. */
+.theme-toggle[aria-pressed="true"] .theme-toggle__knob { transform: translate(calc(var(--largo) - 2 * var(--margine) - var(--icona) - 2px), -50%); }
+.theme-toggle[aria-pressed="false"] .theme-toggle__icon--sun,
+.theme-toggle[aria-pressed="true"] .theme-toggle__icon--moon { color: var(--color-accent); }
+/* Il pulsante occupa il suo spazio anche prima che lo script lo mostri, cosi' la barra non si sposta. */
+.theme-toggle[hidden] { display: inline-flex; visibility: hidden; }
+
+/* A 320 px tolgo il simbolo del marchio, per far stare i due pulsanti sulla stessa riga. */
+@media (max-width: 22rem) { .brand__mark { display: none; } }
+
+@media (min-width: 60rem) {
+  .site-header { position: sticky; top: 0.75rem; flex-wrap: nowrap; }
+  .site-nav { order: 0; flex-basis: auto; margin-inline: auto; }
+  .js .site-header:not([data-nav="open"]) .site-nav { display: block; }
+  .site-nav__list { display: flex; padding: 0; }
+  .brand { margin-right: 0; }
+  .js .nav-toggle[hidden], .nav-toggle { display: none; }
+}
+
+/*
+  L'apertura della pagina: testo centrato su una griglia che sfuma verso il basso. La griglia e'
+  un semplice sfondo largo quanto lo schermo, fatto sparire ai bordi con una maschera.
+*/
+.hero {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+  padding-block: var(--space-5) var(--space-4);
+  text-align: center;
+}
+.hero::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0 calc(50% - 50vw);
+  background:
+    linear-gradient(var(--color-grid) 1px, transparent 1px) 50% 0 / 3.5rem 3.5rem,
+    linear-gradient(90deg, var(--color-grid) 1px, transparent 1px) 50% 0 / 3.5rem 3.5rem;
+  mask-image: radial-gradient(ellipse 60% 70% at 50% 20%, #000 30%, transparent 75%);
+}
+.hero__eyebrow {
+  padding: 0.3rem 0.9rem;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  backdrop-filter: blur(8px);
+}
+.hero__eyebrow strong { color: var(--color-accent); font-weight: 600; }
+
+/* I titoli con la sfumatura: se il browser non sa colorare il testo con una sfumatura, resta il colore pieno. */
+.hero__title, .section__title {
+  color: var(--color-text);
+  background: linear-gradient(180deg, var(--color-text) 40%, color-mix(in srgb, var(--color-text) 62%, var(--color-muted)));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  /* La sfumatura si vede solo dentro il riquadro del testo, e con l'interlinea stretta le lettere
+     che scendono sotto la riga (g, p, q) verrebbero tagliate. Ho allungato il riquadro in basso e l'ho
+     compensato con un margine negativo, cosi' la distanza dal testo che segue non cambia. */
+  padding-bottom: 0.15em;
+  margin-bottom: -0.15em;
+}
+.hero__title {
+  max-width: 18ch;
+  background-image: linear-gradient(115deg, var(--color-text) 35%, var(--color-accent) 75%, var(--color-accent-2));
+}
+.hero__lead { max-width: 60ch; font-size: clamp(1.05rem, 1rem + 0.4vw, 1.2rem); color: var(--color-muted); }
+.hero__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-2); }
+
+/*
+  La fascia delle quattro cifre: quattro celle affiancate (due sul telefono) separate da linee
+  sottili. A schermo il numero sta sopra e l'etichetta sotto, ma nel codice l'etichetta viene prima:
+  cosi' chi usa un lettore di schermo sente prima di cosa si parla. Il testo e' allineato a
+  sinistra, cosi' i numeri che salgono non spostano nulla.
+*/
+.hero__stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr));
+  width: min(100%, 56rem);
+  margin-top: var(--space-3);
+  text-align: left;
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(6px);
+  overflow: hidden;
+}
+.hero__stat {
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  padding: var(--space-2) var(--space-3);
+  box-shadow: -1px 0 0 var(--color-line), 0 -1px 0 var(--color-line);
+}
+.hero__stat dt { font-size: 0.8rem; color: var(--color-muted); }
+.hero__stat dd {
+  font-size: clamp(1.6rem, 1.3rem + 1.2vw, 2.25rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-accent);
+}
+.hero__stat abbr { text-decoration: none; font-size: 0.6em; letter-spacing: 0; }
+.hero__source { font-size: 0.8rem; color: var(--color-muted); }
+
+/* I pulsanti a pillola. Il testo del pulsante principale resta tutto visibile: anche la riga piccola fa parte del nome del link. */
+.hero__cta, .hero__secondary {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 3rem;
+  padding: 0.7rem 1.5rem;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 1.75rem;
+}
+.hero__cta {
+  max-width: 100%;
+  color: var(--color-bg);
+  background: var(--color-text);
+  box-shadow: 0 0 0 1px var(--color-text), 0 0.75rem 2.5rem -0.5rem var(--glow-1), 0 0 3rem -0.5rem color-mix(in srgb, var(--color-accent) 45%, transparent);
+}
+.hero__cta-meta { font-size: 0.8rem; font-weight: 400; opacity: 0.8; }
+.hero__secondary {
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  backdrop-filter: blur(8px);
+}
+.hero__secondary:hover { background: var(--color-surface-2); }
+
+/* Sopra il titolo di ogni sezione c'e' il suo numero, in stile etichetta: e' solo decorativo. */
+.section__title { margin-bottom: var(--space-2); max-width: 22ch; }
+.section__title::before {
+  content: counter(sezione, decimal-leading-zero);
+  content: counter(sezione, decimal-leading-zero) / "";
+  display: block;
+  width: fit-content;
+  margin-bottom: var(--space-2);
+  padding: 0.15rem 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--color-accent);
+  -webkit-text-fill-color: var(--color-accent);
+  border: 1px solid color-mix(in srgb, var(--color-accent) 40%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+}
+
+/* Le schede «in vetro»: sfondo semitrasparente, bordo sottile e un riflesso in alto. */
+.pillar, .kpi-chart, .report {
+  position: relative;
+  padding: var(--space-3);
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(6px);
+}
+.pillar::after, .kpi-chart::after, .report::after {
+  content: "";
+  position: absolute;
+  inset: -1px -1px auto;
+  height: 1px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--color-accent) 60%, transparent), transparent);
+  opacity: 0.5;
+}
+.pillar:hover, .kpi-chart:hover, .report:hover {
+  border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-line));
+  box-shadow: var(--shadow), 0 1.5rem 3rem -1.5rem var(--glow-1);
+}
+.pillar:hover::after, .kpi-chart:hover::after, .report:hover::after { opacity: 1; }
+
+/* I pilastri: sul computer una griglia a riquadri di misure diverse, sul telefono una colonna sola. */
+.pillar__title { display: flex; align-items: center; gap: 0.6rem; margin-bottom: var(--space-2); font-size: 1.2rem; }
+.pillar__title::before {
+  content: "";
+  flex: none;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.6rem;
+  border: 1px solid color-mix(in srgb, var(--color-accent) 40%, transparent);
+  background:
+    radial-gradient(circle at 50% 50%, var(--color-accent) 0 0.22rem, transparent 0.26rem),
+    linear-gradient(135deg, color-mix(in srgb, var(--color-accent) 22%, transparent), color-mix(in srgb, var(--color-accent-2) 10%, transparent));
+}
+.pillar__text { margin-bottom: var(--space-1); color: var(--color-muted); }
+.pillar__text:first-of-type { color: var(--color-text); }
+/* Le fonti stanno in fondo alla scheda, cosi' nelle schede della stessa riga sono tutte alla stessa altezza. */
+.pillar { display: flex; flex-direction: column; }
+.pillar__source { margin-top: auto; padding-top: var(--space-2); }
+
+/*
+  I limiti dei dati sono un elenco da aprire: ogni riga mostra il titolo e la frase di sintesi, e la
+  spiegazione si apre con un clic o con Invio. E' un elemento details del browser, quindi funziona
+  senza script. La freccia a destra e' disegnata con il CSS.
+*/
+.folds { list-style: none; padding: 0; margin-top: var(--space-2); border-top: 1px solid var(--color-line); }
+.folds > li { border-bottom: 1px solid var(--color-line); }
+.fold__summary { display: flex; align-items: center; gap: 0.9rem; padding: 1rem 0.25rem; cursor: pointer; list-style: none; border-radius: var(--radius); }
+.fold__summary::-webkit-details-marker { display: none; }
+.fold__summary::after {
+  content: "";
+  flex: none;
+  margin-left: auto;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-right: 2px solid var(--color-muted);
+  border-bottom: 2px solid var(--color-muted);
+  transform: translateY(-25%) rotate(45deg);
+}
+.fold[open] > .fold__summary::after { transform: translateY(25%) rotate(-135deg); }
+.fold__summary:hover .fold__title { color: var(--color-accent); }
+.fold__icon { flex: none; width: 2.25rem; height: 2.25rem; padding: 0.45rem; border-radius: 0.6rem; border: 1px solid color-mix(in srgb, var(--color-accent) 40%, transparent); background: color-mix(in srgb, var(--color-accent) 10%, transparent); fill: none; stroke: var(--color-accent); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.fold__head { display: flex; flex-direction: column; gap: 0.1rem; }
+.fold__title { font-size: 0.85rem; font-weight: 600; color: var(--color-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.fold__key { font-weight: 650; color: var(--color-text); line-height: 1.4; }
+.fold__text { padding: 0 2.5rem 1.25rem calc(2.25rem + 1.15rem); color: var(--color-muted); font-size: 0.95rem; }
+@media (max-width: 30rem) { .fold__text { padding-left: 0.25rem; padding-right: 0.25rem; } }
+@media (prefers-reduced-motion: no-preference) { .fold__summary::after { transition: transform 0.2s; } }
+
+
+@media (min-width: 64rem) {
+  #pilastri .section__grid { grid-template-columns: repeat(6, 1fr); }
+  #pilastri .pillar { grid-column: span 2; }
+  #pilastri .pillar:nth-child(-n + 2) { grid-column: span 3; }
+}
+
+/*
+  Le note di metodo degli indicatori stanno in un riquadro da aprire. E' anche questo un elemento
+  details: tastiera e lettori di schermo lo usano senza script. E' chiuso all'inizio, perche' vengano
+  prima le tabelle.
+*/
+.howto { margin-block: var(--space-2) var(--space-3); border: 1px solid var(--color-line); border-radius: var(--radius); background: var(--color-surface); }
+.howto__summary { padding: 0.75rem 1rem; font-weight: 600; cursor: pointer; border-radius: inherit; }
+.howto__summary:hover { color: var(--color-accent); }
+.howto[open] .howto__summary { border-bottom: 1px solid var(--color-line); }
+/* In questa sezione introduzione e note di metodo occupano tutta la larghezza, come le tabelle. */
+#pilastri .section__text, #kpi .section__text, .howto .section__list { max-width: none; }
+.howto .section__list { margin: 0; padding: var(--space-2) var(--space-3) var(--space-2) var(--space-4); }
+
+/*
+  Ogni indicatore resta una vera tabella: non cambio il modo in cui il browser dispone tabella, righe
+  e celle, altrimenti i lettori di schermo la perderebbero. La barra e' solo decorativa e la sua
+  lunghezza viene da --v, un numero da 0 a 1 scritto nella cella.
+*/
+.kpi-chart__title { margin-bottom: var(--space-2); }
+.kpi-chart__table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 0.925rem; }
+.kpi-chart__table caption { text-align: left; color: var(--color-muted); font-size: 0.85rem; padding-bottom: var(--space-2); }
+.kpi-chart__table th, .kpi-chart__table td {
+  padding: 0.55rem 0.5rem;
+  text-align: left;
+  vertical-align: top;
+  /* Si va a capo tra le parole e, se una parola non entra, con il trattino della sillabazione italiana. */
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  overflow-wrap: break-word;
+  border-bottom: 1px solid var(--color-line);
+}
+.kpi-chart__table thead th { overflow-wrap: normal; hyphens: manual; font-size: 0.8rem; font-weight: 500; color: var(--color-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.kpi-chart__table tbody th { font-weight: 500; hyphens: manual; } /* le etichette restano intere: la colonna si allarga quanto la parola piu' lunga */
+/* Numero e unita' di misura restano insieme (nel codice li separa uno spazio che non va a capo), e i valori non si sillabano. */
+.kpi-chart__table .kpi-chart__cell { overflow-wrap: normal; hyphens: manual; }
+/* Schermi molto stretti, o pagina ingrandita: celle piu' compatte, perche' le tabelle non escano dalla pagina. */
+@media (max-width: 24rem) {
+  .kpi-chart__table th, .kpi-chart__table td { padding: 0.35rem 0.25rem; }
+  .pillar, .kpi-chart, .report { padding: var(--space-2); }
+}
+/* Sotto i 352 px si sillabano anche le etichette, altrimenti la tabella uscirebbe dalla pagina. */
+@media (max-width: 22rem) {
+  .kpi-chart__table tbody th { hyphens: auto; }
+}
+.kpi-chart__cell::after {
+  content: "";
+  display: block;
+  height: 0.45rem;
+  margin-top: 0.4rem;
+  width: calc(var(--v, 0) * 100%);
+  background: linear-gradient(90deg, var(--color-accent-2), var(--color-accent));
+  border-radius: 999px;
+  box-shadow: 0 0 0.75rem -0.1rem color-mix(in srgb, var(--color-accent) 60%, transparent);
+}
+/* Un peggioramento non e' segnato solo dal colore: la barra e' tratteggiata e la colonna «Lettura» lo scrive. */
+.kpi-chart__cell--worse::after {
+  background: repeating-linear-gradient(45deg, var(--color-worse) 0 0.35rem, transparent 0.35rem 0.6rem);
+  border: 1px solid var(--color-worse);
+  box-shadow: none;
+}
+.kpi-chart__note { margin-top: var(--space-2); font-size: 0.875rem; color: var(--color-muted); }
+
+/* I paragrafi delle sezioni hanno una larghezza comoda da leggere, e la fonte e' sempre visibile. */
+.section__text, .section__list { max-width: var(--measure); margin-bottom: var(--space-2); color: var(--color-muted); }
+.section__text strong, .section__list strong { color: var(--color-text); }
+.section__subtitle { margin-block: var(--space-4) var(--space-2); }
+.section__list { padding-left: var(--space-3); list-style: none; }
+.section__list li { position: relative; margin-bottom: var(--space-1); }
+.section__list li::before {
+  content: "";
+  position: absolute;
+  left: -1.1rem;
+  top: 0.65em;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+.section__source, .pillar__source, .step__source { color: var(--color-muted); font-size: 0.825rem; }
+
+/*
+  Le cifre di «Fileni in cifre» sono un percorso a tappe. Ogni tappa ha un riquadro con icona e
+  numero (solo decorativi), l'etichetta, la cifra e una nota con la fonte. La linea verso la tappa
+  successiva e' un riquadro con due soli bordi e un angolo arrotondato: cosi' ottengo una curva
+  senza disegni. Sul telefono le tappe stanno in colonna e la linea scende dritta sotto il riquadro.
+*/
+.steps { --tondo: 4.5rem; --passo: var(--space-4); display: grid; gap: var(--passo); margin-top: var(--space-3); }
+.step { position: relative; padding-left: calc(var(--tondo) + var(--space-3)); min-height: var(--tondo); }
+.step__badge {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  place-items: center;
+  width: var(--tondo);
+  height: var(--tondo);
+  border: 2px solid var(--color-accent);
+  border-radius: 1.25rem;
+  background: var(--color-surface);
+}
+.step__icon { width: 55%; height: 55%; fill: none; stroke: var(--color-accent); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.step__num {
+  position: absolute;
+  right: -0.9rem;
+  bottom: -0.9rem;
+  display: grid;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 50%;
+  background: var(--color-accent);
+  color: var(--color-bg);
+  font-size: 0.95rem;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.step__label { font-weight: 600; line-height: 1.35; }
+.step__value { margin-top: 0.35rem; font-size: clamp(2rem, 1.5rem + 2vw, 2.75rem); font-weight: 750; letter-spacing: -0.04em; line-height: 1.1; color: var(--color-accent); font-variant-numeric: tabular-nums; }
+.step__value abbr { font-size: 0.55em; text-decoration: none; letter-spacing: -0.01em; }
+.step__note { margin-top: 0.4rem; font-size: 0.9rem; color: var(--color-muted); max-width: 32ch; }
+.step:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: calc(var(--tondo) / 2 - 1px);
+  top: calc(var(--tondo) + 1.3rem);
+  bottom: calc(-1 * var(--passo) + 0.5rem);
+  border-left: 2px solid color-mix(in srgb, var(--color-accent) 55%, transparent);
+  border-radius: 1px;
+}
+/* Sul computer le tappe si alternano tra meta' sinistra e meta' destra, e la linea curva va dalla fine di una tappa all'inizio della successiva. */
+@media (min-width: 48rem) {
+  .steps { --passo: var(--space-4); gap: var(--passo); }
+  .step { width: 50%; padding-right: var(--space-3); }
+  .step:nth-child(even) { margin-left: 50%; }
+  .step:not(:last-child)::after {
+    top: calc(var(--tondo) / 2);
+    bottom: calc(-1 * var(--passo));
+    left: auto;
+    right: calc(-50% + var(--tondo) / 2 - 1px);
+    width: calc(50% - var(--tondo) / 2 + 1px);
+    border-left: 0;
+    border-top: 2px solid color-mix(in srgb, var(--color-accent) 55%, transparent);
+    border-right: 2px solid color-mix(in srgb, var(--color-accent) 55%, transparent);
+    border-radius: 0 3rem 0 0;
+  }
+  /* Dalla tappa di destra si torna a sinistra: la curva e' rovesciata e parte dal riquadro. */
+  .step:nth-child(even):not(:last-child)::after {
+    right: auto;
+    left: calc(-50% + var(--tondo) / 2 - 1px);
+    width: calc(50% - var(--tondo) / 2 + 1px);
+    border-right: 0;
+    border-left: 2px solid color-mix(in srgb, var(--color-accent) 55%, transparent);
+    border-radius: 3rem 0 0 0;
+  }
+}
+
+/* Archivio */
+.archive__years { display: flex; flex-wrap: wrap; gap: var(--space-1); margin-block: var(--space-2) var(--space-3); }
+.archive__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 1rem;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+  text-decoration: none;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+}
+.archive__link:hover { border-color: var(--color-accent); color: var(--color-accent); }
+/* Con JavaScript attivo l'indice per anno non serve: ci sono il filtro e le chip dei filtri attivi. */
+.js .archive__index { display: none; }
+
+/*
+  Le chip dei filtri attivi: l'etichetta e' solo testo, e l'unica parte che toglie il filtro e' il
+  tondo con la x in alto a destra. E' di 24 px, la misura minima che le linee guida chiedono per
+  qualcosa da cliccare o toccare.
+*/
+.chips { display: flex; flex-wrap: wrap; gap: 0.9rem 0.85rem; margin-block: var(--space-2) var(--space-3); }
+.chips[hidden] { display: none; }
+.chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 1.1rem;
+  font-size: 0.925rem;
+  color: var(--color-text);
+  background: color-mix(in srgb, var(--color-accent) 10%, var(--color-surface));
+  border: 1px solid color-mix(in srgb, var(--color-accent) 55%, var(--color-line));
+  border-radius: 999px;
+}
+.chip__x {
+  position: absolute;
+  top: -0.55rem;
+  right: -0.55rem;
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--color-accent);
+  color: var(--color-bg);
+  box-shadow: 0 0 0 2px var(--color-bg);
+  cursor: pointer;
+}
+.chip__x::before { content: "\00d7" / ""; font-size: 1.05rem; font-weight: 700; line-height: 1; }
+.chip__x:hover { background: var(--color-worse); }
+/*
+  L'archivio e' disegnato come una linea del tempo: anni ed elenchi hanno lo stesso bordo sinistro,
+  continuo (per questo uso spazi interni e non margini, che lo interromperebbero), e ogni anno ha un
+  pallino sulla linea. Il pallino si accende, grazie all'animazione della sezione 6, quando l'anno
+  arriva a meta' schermo.
+*/
+@property --luce { syntax: "<color>"; inherits: true; initial-value: transparent; }
+.archive__year, .archive__list {
+  position: relative;
+  margin-left: 0.5rem;
+  padding-left: clamp(1.25rem, 0.75rem + 2vw, 2.25rem);
+  border-left: 1px solid var(--color-line);
+}
+.archive__year {
+  --luce: var(--color-accent);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-block: 0;
+  padding-block: var(--space-4) var(--space-2);
+  font-size: 1.5rem;
+  font-variant-numeric: tabular-nums;
+}
+.archive__year::before {
+  content: "";
+  position: absolute;
+  left: calc(-0.5rem - 0.5px);
+  top: calc(var(--space-4) + 0.86rem - 0.5rem);
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background: var(--color-bg);
+  border: 2px solid var(--color-accent);
+  box-shadow: inset 0 0 0 0.2rem var(--color-bg), inset 0 0 0 1rem var(--luce), 0 0 0.9rem -0.1rem var(--luce);
+}
+/* Il filo luminoso dopo l'anno e' solo decorazione. */
+.archive__year::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, var(--color-line), transparent); }
+.archive__list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: var(--space-2); }
+.archive__status { min-height: 1.6em; color: var(--color-muted); }
+
+/* Un elemento nascosto deve restare nascosto anche se ha una disposizione a griglia: serve al filtro dell'archivio. */
+.archive [hidden] { display: none; }
+
+.archive-filter { margin-block: var(--space-3) var(--space-2); }
+.archive-filter__fields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-3);
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(6px);
+}
+.archive-filter__fields legend { float: left; width: 100%; margin-bottom: var(--space-1); padding: 0; font-weight: 600; }
+.archive-filter__field { display: grid; gap: 0.35rem; min-width: 0; flex: 1 1 12rem; font-size: 0.875rem; color: var(--color-muted); }
+/* Campi e pulsanti alti almeno 44 px, con un bordo ben visibile. */
+.archive-filter input, .archive-filter select, .archive-filter__reset {
+  max-width: 100%;
+  min-height: 2.75rem;
+  padding: 0 0.85rem;
+  font: inherit;
+  font-size: 1rem;
+  color: var(--color-text);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+.archive-filter input:focus-visible, .archive-filter select:focus-visible { border-color: var(--color-accent); }
+/* Ogni campo resta nella sua colonna e non finisce sopra il pulsante accanto. */
+.archive-filter input, .archive-filter select { width: 100%; }
+/*
+  I menu a tendina hanno una freccia a «v» disegnata in SVG, con le punte arrotondate, a 1 rem dal
+  bordo: quella del sistema sta troppo attaccata al bordo. Il colore di un'immagine non cambia da
+  solo con il tema, quindi c'e' una regola per il tema scuro. Con il contrasto elevato di Windows
+  torna la freccia del sistema (sezione 6).
+*/
+.archive-filter select {
+  appearance: none;
+  padding-right: 2.75rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1.5 1.5 6 6l4.5-4.5' fill='none' stroke='%230a0f0b' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-position: right 1rem center;
+  background-size: 0.75rem 0.5rem;
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+:root[data-theme="dark"] .archive-filter select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1.5 1.5 6 6l4.5-4.5' fill='none' stroke='%23f2f5f3' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+.archive-filter__reset { cursor: pointer; padding-inline: 1.25rem; background: var(--color-surface-2); border-radius: 999px; }
+
+.report { display: flex; flex-direction: column; gap: var(--space-2); }
+.report__title { font-size: 1.1rem; }
+.report__meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr)); gap: var(--space-1) var(--space-2); font-size: 0.875rem; }
+.report__meta-item dt { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-muted); }
+.report__links { display: grid; gap: var(--space-1); margin-top: auto; }
+.report__link {
+  display: block;
+  min-height: 2.75rem;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.9rem;
+  text-decoration: none;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius);
+}
+.report__link > span:not(.visually-hidden) { text-decoration: underline; text-underline-offset: 0.22em; }
+/*
+  Un documento con la copia di riserva: il link principale al sito di Fileni e, accanto, un pulsante
+  piu' piccolo per la copia ospitata qui (sul telefono il pulsante va sotto). Il nome completo della
+  copia c'e', ma nascosto alla vista: «Copia di riserva» da solo, letto fuori contesto, non direbbe
+  di quale documento si tratta.
+*/
+.report__row { display: flex; flex-wrap: wrap; gap: var(--space-1); }
+.report__row .report__link:first-child { flex: 1 1 16rem; }
+.report__row .tip { flex: none; }
+/* Sul telefono la copia di riserva va sotto il link e occupa tutta la larghezza della scheda. */
+@media (max-width: 40rem) {
+  .report__row .tip { flex: 1 1 100%; }
+  .report__row .report__link--alt { flex: 1 1 auto; justify-content: center; }
+}
+/*
+  La spiegazione della copia di riserva compare passando con il mouse o arrivandoci con la tastiera.
+  Resta visibile mentre il mouse ci passa sopra, perche' sta nello stesso contenitore, e si chiude
+  con Esc (lo gestisce archive.js). Lo stesso testo e' anche la descrizione del link, quindi chi usa
+  un lettore di schermo lo sente comunque. Sul telefono si apre verso destra, sul computer verso
+  sinistra: in nessun caso esce dalla pagina.
+*/
+.tip { position: relative; display: inline-flex; }
+.tip__text {
+  position: absolute;
+  z-index: 5;
+  bottom: calc(100% + 0.5rem);
+  left: 0;
+  width: max-content;
+  max-width: min(20rem, 80vw);
+  padding: 0.75rem 0.9rem;
+  font-size: 0.825rem;
+  line-height: 1.5;
+  color: var(--color-text);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: 0 1rem 2rem -1rem rgb(0 0 0 / 0.5);
+  opacity: 0;
+  visibility: hidden;
+}
+.tip:hover .tip__text, .tip:focus-within .tip__text { opacity: 1; visibility: visible; }
+.tip.tip--off .tip__text { opacity: 0; visibility: hidden; }
+@media (min-width: 40rem) { .tip__text { left: auto; right: 0; } }
+.report__link--alt {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border-color: var(--color-border);
+  white-space: nowrap;
+}
+.report__link:hover { border-color: var(--color-accent); }
+/*
+  I link che si aprono in una nuova scheda hanno una freccia ↗ come segnale visivo, che i lettori di
+  schermo saltano. Per loro l'avviso e' scritto nel testo nascosto del link. Nel pulsante
+  dell'apertura la freccia segue la seconda riga.
+*/
+a[target="_blank"]:not(.hero__cta)::after, .hero__cta-meta::after {
+  content: "\2009\2197";
+  content: "\2009\2197" / "";
+  display: inline-block;
+  text-decoration: none;
+}
+.archive__note { margin-top: var(--space-3); color: var(--color-muted); font-size: 0.9rem; }
+/* L'etichetta accanto al titolo di un documento dell'archivio (oggi c'e' solo «Ultimo report»). */
+.report__badge {
+  display: inline-block;
+  margin-top: 0.4rem;
+  padding: 0.1rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-worse);
+  border: 1px solid var(--color-worse);
+  border-radius: 999px;
+}
+/* Tra il titolo e l'etichetta c'e' uno spazio fisso; se l'etichetta va a capo, resta allineata a sinistra. */
+.report__title:has(.report__badge) { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem 1rem; }
+.report__title:has(.report__badge) .report__badge { margin-top: 0; }
+/* L'ultimo report e' segnalato dall'etichetta scritta e, in piu', da bordo e alone. */
+.report--latest {
+  border-color: color-mix(in srgb, var(--color-accent) 55%, var(--color-line));
+  background: linear-gradient(160deg, color-mix(in srgb, var(--color-accent) 9%, transparent), transparent 60%), var(--color-surface);
+  box-shadow: var(--shadow), 0 1.5rem 3rem -1.5rem var(--glow-1);
+}
+.report__badge--latest { color: var(--color-accent); border-color: var(--color-accent); background: color-mix(in srgb, var(--color-accent) 10%, transparent); }
+
+.site-footer {
+  margin-top: var(--space-3);
+  padding-block: var(--space-4);
+  border-top: 1px solid var(--color-line);
+  color: var(--color-muted);
+  font-size: 0.875rem;
+}
+.site-footer__text + .site-footer__text { margin-top: var(--space-1); }
+
+/*
+  La decorazione dei campi sotto l'apertura ha un'altezza fissa, cosi' non sposta nulla mentre si
+  carica. Il disegno e' piu' alto della sua cornice per potersi muovere con lo scorrimento. Le
+  colline sfumano nello sfondo.
+*/
+.field { height: 7rem; overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent); }
+.field svg { display: block; width: 100%; height: calc(100% + 3rem); margin-top: -1.5rem; }
+.field__sun { display: none; }
+.field__far { fill: var(--color-accent-2); opacity: 0.12; }
+.field__mid { fill: var(--color-accent); opacity: 0.2; }
+.field__near { fill: var(--color-accent); opacity: 0.35; }
+.field__rows { fill: none; stroke: var(--color-accent); stroke-width: 1.5; opacity: 0.6; }
+
+/*
+  Il pulsante per tornare in cima: fisso in basso a destra, rotondo, semitrasparente. E' un semplice
+  link all'inizio della pagina, quindi funziona anche senza JavaScript. Il margine in fondo alla
+  pagina fa si' che non copra mai l'elemento su cui c'e' il focus. Nei browser recenti compare solo
+  dopo che si e' scesi un po' (sezione 6).
+*/
+html { scroll-padding-bottom: 5rem; }
+.to-top {
+  position: fixed;
+  z-index: 15;
+  right: max(1rem, (100% - var(--page)) / 2 - 4rem);
+  bottom: 1.25rem;
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  color: var(--color-text);
+  background: color-mix(in srgb, var(--color-bg) 72%, transparent);
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  box-shadow: 0 0.75rem 2rem -1rem rgb(0 0 0 / 0.5), 0 0 1.5rem -0.5rem var(--glow-1);
+  backdrop-filter: blur(12px);
+}
+.to-top svg { width: 1.25rem; height: 1.25rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.to-top:hover { color: var(--color-accent); border-color: var(--color-accent); }
+
+/* ===== 6. Movimento e preferenze dell'utente ===== */
+
+/*
+  Animo solo posizione, trasparenza e sfondi, cose che non costringono il browser a ridisporre la
+  pagina. Tutto parte solo se chi visita non ha chiesto di ridurre il movimento, e le animazioni
+  legate allo scorrimento solo nei browser che le conoscono. Fuori da questa sezione nessun elemento
+  parte invisibile. Il testo dell'apertura non si muove mai: e' la prima cosa che si legge.
+*/
+@media (prefers-reduced-motion: no-preference) {
+  .pillar, .kpi-chart, .report, .archive__link, .hero__cta, .hero__secondary, .site-nav__link, .theme-toggle__knob, .nav-toggle line, .to-top {
+    transition: border-color 0.25s, box-shadow 0.25s, background-color 0.25s, transform 0.25s, opacity 0.25s;
+  }
+  .pillar:hover, .kpi-chart:hover, .report:hover, .hero__cta:hover { transform: translateY(-2px); }
+
+  /* L'alone dell'apertura si accende piano, una volta sola, quando la pagina si apre. */
+  @keyframes alone { from { opacity: 0; transform: scale(0.96); } }
+  .hero::before { animation: alone 1.2s ease-out both; }
+
+  @supports (animation-timeline: view()) {
+    @keyframes comparsa {
+      from { opacity: 0; transform: translateY(2rem) scale(0.98); }
+      to { opacity: 1; transform: none; }
+    }
+    @keyframes parallasse {
+      from { transform: translateY(-1.5rem); }
+      to { transform: translateY(1.5rem); }
+    }
+    @keyframes avanzamento { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+    @keyframes accendi { from { --luce: transparent; } }
+    /* Il pulsante per tornare in cima compare nei primi 600 px di scorrimento; prima e' invisibile e il tasto Tab non ci si ferma. */
+    @keyframes compari { from { opacity: 0; visibility: hidden; transform: translateY(1rem); } }
+    .to-top { animation: compari linear both; animation-timeline: scroll(root); animation-range: 0 600px; }
+    /* Linea del tempo: il pallino di un anno si accende mentre l'anno sale verso meta' schermo. */
+    .archive__year { animation: accendi linear both; animation-timeline: view(); animation-range: entry 0% cover 45%; }
+    [data-js="reveal"] {
+      animation: comparsa linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 55%;
+    }
+    /* Cifre a tappe: la linea verso la tappa successiva si disegna mentre la tappa sale sullo schermo. */
+    @keyframes traccia-giu { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0); } }
+    @keyframes traccia-destra {
+      0% { clip-path: inset(0 100% calc(100% - 3.5rem) 0); }
+      50% { clip-path: inset(0 0 calc(100% - 3.5rem) 0); }
+      100% { clip-path: inset(0); }
+    }
+    @keyframes traccia-sinistra {
+      0% { clip-path: inset(0 0 calc(100% - 3.5rem) 100%); }
+      50% { clip-path: inset(0 0 calc(100% - 3.5rem) 0); }
+      100% { clip-path: inset(0); }
+    }
+    .step { view-timeline: --tappa block; }
+    .step:not(:last-child)::after { animation: traccia-giu linear both; animation-timeline: --tappa; animation-range: cover 25% cover 60%; }
+    @media (min-width: 48rem) {
+      .step:nth-child(odd):not(:last-child)::after { animation-name: traccia-destra; }
+      .step:nth-child(even):not(:last-child)::after { animation-name: traccia-sinistra; }
+    }
+    .field { view-timeline: --campo block; }
+    .field svg { animation: parallasse linear both; animation-timeline: --campo; }
+    /* In cima alla pagina, una barra sottile che si riempie man mano che si legge. */
+    body::before {
+      content: "";
+      position: fixed;
+      z-index: 30;
+      inset: 0 0 auto;
+      height: 2px;
+      background: linear-gradient(90deg, var(--color-accent-2), var(--color-accent));
+      transform-origin: 0 50%;
+      animation: avanzamento linear both;
+      animation-timeline: scroll(root);
+    }
+  }
+
+  /* Per i browser che non hanno le animazioni legate allo scorrimento: la classe la aggiunge motion.js. */
+  @supports not (animation-timeline: view()) {
+    .reveal-js { opacity: 0; transform: translateY(2rem); }
+    .reveal-js.is-visible {
+      opacity: 1;
+      transform: none;
+      transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+    }
+  }
+}
+
+/* Se chi visita chiede di ridurre il movimento: nessuna animazione e nessuno scorrimento morbido. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/*
+  Con il contrasto elevato di Windows i colori li decide il sistema. Il testo con la sfumatura torna
+  a tinta unita, le decorazioni spariscono e le barre usano i colori di sistema.
+*/
+@media (forced-colors: active) {
+  .hero__title, .section__title { -webkit-text-fill-color: currentColor; background: none; }
+  .hero::before, .field, .archive__year::before, .pillar::after, .kpi-chart::after, .report::after { display: none; }
+  .kpi-chart__cell::after { background: CanvasText; }
+  .kpi-chart__cell--worse::after { background: Canvas; border: 2px dashed CanvasText; }
+  .hero__cta { border: 2px solid ButtonText; }
+  .theme-toggle__knob { border: 2px solid ButtonText; }
+  .archive-filter select { appearance: auto; background-image: none; }
+  .to-top { border: 2px solid ButtonText; }
+  .step__num { border: 2px solid CanvasText; }
+  .section__art { display: none; }
+}
+
+/* ===== 7. Stampa ===== */
+
+/* In stampa esce solo il contenuto, su fondo bianco: niente barra, interruttore, filtro e decorazioni. */
+@media print {
+  :root { color-scheme: light; }
+  .skip-link, .site-nav, .theme-toggle, .nav-toggle, .to-top, .tip__text, .archive-filter, .field, .hero::before, body::before, .step::after, .section__art { display: none; }
+  .hero__title, .section__title { -webkit-text-fill-color: currentColor; background: none; }
+  [data-js="reveal"] { animation: none; opacity: 1; transform: none; }
+  /* Le note di metodo si stampano anche se il riquadro e' chiuso, nei browser che lo permettono. */
+  .howto::details-content, .fold::details-content { content-visibility: visible; height: auto; }
+  a[href^="http"]::after, a[target="_blank"]:not(.hero__cta)::after { content: " (" attr(href) ")"; }
+  .hero__cta-meta::after { content: none; }
+  body { color: #000; background: #fff; }
+}
